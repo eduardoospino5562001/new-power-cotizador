@@ -1,0 +1,22 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-orange: #f97316;
+  --color-brand-orange-dark: #ea580c;
+  --color-brand-orange-light: #fed7aa;
+  --color-brand-dark: #1c1917;
+  --color-brand-gray: #44403c;
+  --color-brand-light: #f5f5f4;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+#root {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+}
