@@ -1,8 +1,23 @@
 # New Power Cotizador
 
-Aplicación web para generar cotizaciones profesionales en PDF, desarrollada para **NEW POWER ENERGY SAS**.
+Aplicación web para generar cotizaciones profesionales e informes técnicos con registro fotográfico en PDF, desarrollada para **NEW POWER ENERGY SAS**.
 
-## Tecnologías
+## Funcionalidades
+
+### Módulo de Cotizaciones
+- Cotizaciones profesionales con ítems dinámicos, impuestos por línea y descuentos.
+- Vista previa en tiempo real (escritorio: dos columnas, móvil: pestañas).
+- Auto-numeración correlativa (C-1-XXX).
+- Borrador autoguardado en localStorage.
+
+### Módulo de Informes Técnicos
+- Informes técnicos con registro fotográfico por grupos de sitio/ubicación.
+- Carga de fotos desde archivo, arrastrar y soltar, o cámara en móvil.
+- Corrección automática de orientación y reducción de tamaño de imágenes.
+- Cuadrícula uniforme de fotos con proporción fija en vista previa y PDF.
+- Reordenar fotos y grupos (drag & drop en escritorio, botones en móvil).
+- Auto-numeración de informe (IT-XXX).
+- Borrador autoguardado en IndexedDB (soporta fotos en base64).
 
 - **React 19** + **TypeScript**
 - **Vite** (build)
@@ -62,12 +77,19 @@ src/
 │   ├── ui/          # Button, Input, Select, TextArea, Card
 │   └── layout/      # Header, Footer, PageContainer
 ├── features/
-│   └── quote/
-│       ├── components/  # QuoteForm, QuotePreview, ItemRow, TotalsSummary
-│       ├── hooks/       # useQuoteForm, useGeneratePdf
-│       ├── logic/       # calculations, validation
-│       ├── lib/         # formatCurrency, storage
-│       └── pdf/         # QuotePDF, fonts
+│   ├── quote/       # Cotizaciones
+│   │   ├── components/  # QuoteForm, QuotePreview, ItemRow, TotalsSummary
+│   │   ├── hooks/       # useQuoteForm, useGeneratePdf
+│   │   ├── logic/       # calculations, validation
+│   │   ├── lib/         # formatCurrency, storage
+│   │   └── pdf/         # QuotePDF, fonts
+│   └── report/      # Informes técnicos
+│       ├── components/  # ReportForm, ReportPreview, PhotoGroup
+│       ├── hooks/       # useReportForm, useGenerateReportPdf
+│       ├── logic/       # validation
+│       ├── lib/         # format, storage, imageLoader
+│       ├── pdf/         # ReportPDF
+│       └── types.ts
 ├── constants/
 ├── assets/          # logo, fonts
 ├── App.tsx
@@ -76,7 +98,9 @@ src/
 
 ## Documentación adicional
 
-- [Especificación de campos](./docs/spec-campos.md)
+- [Especificación de campos — Cotizaciones](./docs/spec-campos.md)
+- [Especificación de datos — Informes Técnicos](./docs/spec-informes.md)
+- [Arquitectura del módulo de informes técnicos](./docs/REPORT-ARCHITECTURE.md)
 - [Decisiones de arquitectura](./docs/ADR.md)
 - [Plan técnico completo](./docs/ARCHITECTURE.md)
 
