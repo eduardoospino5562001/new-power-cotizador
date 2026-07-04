@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header, Footer, PageContainer } from '@/components/layout'
 import { Button, Card } from '@/components/ui'
-import { FileText, Receipt, ArrowLeft } from 'lucide-react'
+import { FileText, Receipt, Home } from 'lucide-react'
 
 import { useQuoteForm } from '@/features/quote/hooks/useQuoteForm'
 import { useGeneratePdf } from '@/features/quote/hooks/useGeneratePdf'
@@ -103,7 +103,7 @@ function App() {
     <>
       <Header>
         <button onClick={irAHome} className="flex items-center gap-1 text-sm text-brand-orange-light hover:text-white transition-colors">
-          <ArrowLeft size={16} /> Inicio
+          <Home size={16} />
         </button>
       </Header>
 

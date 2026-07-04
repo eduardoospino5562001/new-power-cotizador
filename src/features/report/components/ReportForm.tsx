@@ -35,12 +35,7 @@ export function ReportForm({ form }: ReportFormProps) {
       </Card>
 
       <div>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-brand-dark">Registro Fotográfico</h2>
-          <Button type="button" variant="secondary" size="sm" onClick={addGrupo}>
-            <Plus size={16} className="mr-1" /> Agregar grupo de fotos
-          </Button>
-        </div>
+        <h2 className="text-lg font-bold text-brand-dark mb-4">Registro Fotográfico</h2>
 
         <div className="space-y-4">
           {grupos.length === 0 && (
@@ -62,6 +57,12 @@ export function ReportForm({ form }: ReportFormProps) {
               isLast={index === grupos.length - 1}
             />
           ))}
+
+          <div className="flex justify-center pt-2">
+            <Button type="button" variant="secondary" size="sm" onClick={addGrupo}>
+              <Plus size={16} className="mr-1" /> Agregar grupo de fotos
+            </Button>
+          </div>
         </div>
       </div>
 
