@@ -27,8 +27,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   logo: {
-    width: 57,
-    height: 57,
+    width: 68,
+    height: 68,
   },
   empresaNombre: {
     fontSize: 14,
@@ -185,7 +185,7 @@ export function QuotePDF({ cotizacion, logoSrc }: QuotePDFProps) {
         </View>
 
         <View style={styles.seccionCliente}>
-          <Text style={styles.clienteLabel}>Para</Text>
+          <Text style={styles.clienteLabel}>Cliente</Text>
           <Text style={styles.clienteNombre}>{cotizacion.cliente.nombre}</Text>
           <Text style={styles.clienteNit}>NIT {cotizacion.cliente.nit}</Text>
           {cotizacion.cliente.ciudad && (

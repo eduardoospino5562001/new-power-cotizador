@@ -110,7 +110,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
       </div>
 
       <div className="mb-4 text-sm border-t border-brand-orange-light pt-3">
-        <p><span className="font-semibold">Para:</span> {clienteNombre}</p>
+        <p><span className="font-semibold">Cliente:</span> {clienteNombre}</p>
         <p><span className="font-semibold">NIT:</span> {clienteNit}</p>
         {values?.cliente?.ciudad && <p><span className="font-semibold">Ciudad:</span> {values.cliente.ciudad}</p>}
         {values?.vendedor && <p><span className="font-semibold">Vendedor:</span> {values.vendedor}</p>}
