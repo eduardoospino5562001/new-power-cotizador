@@ -26,7 +26,7 @@ export function QuoteForm({ form }: QuoteFormProps) {
           </Button>
         </div>
         <div className="space-y-3">
-          <Input label="N.º Cotización" {...register('numero')} readOnly />
+          <Input label="N.º Cotización" {...register('numero')} />
           <Input label="Fecha de emisión" type="date" {...register('fecha')} />
           <Input label="Validez (días)" type="number" {...register('validezDias', { valueAsNumber: true })} min={1} />
           {vencimiento && (
