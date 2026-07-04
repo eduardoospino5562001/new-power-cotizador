@@ -1,95 +1,150 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Header, Footer, PageContainer } from '@/components/layout'
+import { Button, Card } from '@/components/ui'
+import { FileText, Receipt, ArrowLeft } from 'lucide-react'
+
 import { useQuoteForm } from '@/features/quote/hooks/useQuoteForm'
 import { useGeneratePdf } from '@/features/quote/hooks/useGeneratePdf'
 import { QuoteForm } from '@/features/quote/components/QuoteForm'
 import { QuotePreview } from '@/features/quote/components/QuotePreview'
-import { cargarBorrador, borrarBorrador } from '@/features/quote/lib/storage'
-import { Button } from '@/components/ui'
+import { cargarBorrador as cargarBorradorQuote, borrarBorrador as borrarBorradorQuote } from '@/features/quote/lib/storage'
 import type { CotizacionFormData } from '@/features/quote/logic/validation'
 import type { Cotizacion } from '@/features/quote/types'
 
+import { useReportForm } from '@/features/report/hooks/useReportForm'
+import { useGenerateReportPdf } from '@/features/report/hooks/useGenerateReportPdf'
+import { ReportForm } from '@/features/report/components/ReportForm'
+import { ReportPreview } from '@/features/report/components/ReportPreview'
+import { cargarBorrador as cargarBorradorReport, borrarBorrador as borrarBorradorReport } from '@/features/report/lib/storage'
+import type { InformeFormData } from '@/features/report/logic/validation'
+import type { InformeTecnico } from '@/features/report/types'
+
+type Modulo = 'home' | 'quote' | 'report'
+
 function App() {
-  const form = useQuoteForm()
-  const { generate, generating, error: pdfError } = useGeneratePdf()
-  const [tab, setTab] = useState<'editar' | 'vistaprevia'>('editar')
-  const [draftDetected, setDraftDetected] = useState(false)
+  const [modulo, setModulo] = useState<Modulo>('home')
+
+  const quoteForm = useQuoteForm()
+  const { generate: generateQuote, generating: generatingQuote, error: pdfErrorQuote } = useGeneratePdf()
+  const [draftQuote, setDraftQuote] = useState(false)
+
+  const reportForm = useReportForm()
+  const { generate: generateReport, generating: generatingReport, error: pdfErrorReport } = useGenerateReportPdf()
+  const [draftReport, setDraftReport] = useState(false)
 
   useEffect(() => {
-    const draft = cargarBorrador<CotizacionFormData>()
-    if (draft && draft.numero) {
-      setDraftDetected(true)
-    }
+    const q = cargarBorradorQuote<CotizacionFormData>()
+    if (q && q.numero) setDraftQuote(true)
+
+    const r = cargarBorradorReport<InformeFormData>()
+    if (r && r.fecha) setDraftReport(true)
   }, [])
 
-  const descartarBorrador = () => {
-    borrarBorrador()
-    setDraftDetected(false)
-    form.empezarNueva()
+  const irAHome = useCallback(() => setModulo('home'), [])
+
+  const descartarBorradorQuote = () => {
+    borrarBorradorQuote()
+    setDraftQuote(false)
+    quoteForm.empezarNueva()
   }
 
-  const handleGeneratePdf = (cotizacion: Cotizacion) => {
-    generate(cotizacion)
+  const descartarBorradorReport = () => {
+    borrarBorradorReport()
+    setDraftReport(false)
+    reportForm.empezarNueva()
+  }
+
+  const handleGenerateQuotePdf = (cotizacion: Cotizacion) => {
+    generateQuote(cotizacion)
+  }
+
+  const handleGenerateReportPdf = (informe: InformeTecnico) => {
+    generateReport(informe)
+  }
+
+  if (modulo === 'home') {
+    return (
+      <>
+        <Header />
+        <PageContainer>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
+            <h2 className="text-2xl font-bold text-brand-dark text-center">
+              ¿Qué deseas crear?
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
+              <button onClick={() => setModulo('quote')} className="group">
+                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Receipt size={32} className="text-brand-orange-dark" />
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-dark mb-2">Nueva cotización</h3>
+                  <p className="text-sm text-brand-gray">Genera una cotización profesional con ítems, impuestos y totales</p>
+                </Card>
+              </button>
+              <button onClick={() => setModulo('report')} className="group">
+                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FileText size={32} className="text-brand-orange-dark" />
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-dark mb-2">Nuevo informe técnico</h3>
+                  <p className="text-sm text-brand-gray">Crea un informe técnico con registro fotográfico y observaciones</p>
+                </Card>
+              </button>
+            </div>
+          </div>
+        </PageContainer>
+        <Footer />
+      </>
+    )
   }
 
   return (
     <>
-      <Header />
+      <Header>
+        <button onClick={irAHome} className="flex items-center gap-1 text-sm text-brand-orange-light hover:text-white transition-colors">
+          <ArrowLeft size={16} /> Inicio
+        </button>
+      </Header>
 
-      {draftDetected && (
+      {modulo === 'quote' && draftQuote && (
         <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
           <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
-            <p className="text-brand-dark">
-              Borrador recuperado automáticamente.
-            </p>
-            <div className="flex gap-2">
-              <Button variant="ghost" size="sm" onClick={descartarBorrador}>
-                Descartar
-              </Button>
-            </div>
+            <p className="text-brand-dark">Borrador de cotización recuperado automáticamente.</p>
+            <Button variant="ghost" size="sm" onClick={descartarBorradorQuote}>Descartar</Button>
           </div>
         </div>
       )}
 
-      <nav className="lg:hidden flex border-b border-brand-orange-light">
-        <button
-          onClick={() => setTab('editar')}
-          className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${
-            tab === 'editar'
-              ? 'text-brand-orange border-b-2 border-brand-orange bg-brand-orange-light/20'
-              : 'text-brand-gray hover:text-brand-dark'
-          }`}
-        >
-          Editar
-        </button>
-        <button
-          onClick={() => setTab('vistaprevia')}
-          className={`flex-1 py-3 text-sm font-semibold text-center transition-colors ${
-            tab === 'vistaprevia'
-              ? 'text-brand-orange border-b-2 border-brand-orange bg-brand-orange-light/20'
-              : 'text-brand-gray hover:text-brand-dark'
-          }`}
-        >
-          Vista previa
-        </button>
-      </nav>
-
-      <PageContainer>
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <div className={tab === 'vistaprevia' ? 'hidden lg:block' : ''}>
-            <QuoteForm form={form} />
-          </div>
-
-          <div className={`lg:sticky lg:top-6 lg:self-start ${tab === 'editar' ? 'hidden lg:block' : ''}`}>
-            <QuotePreview
-              control={form.control}
-              onGeneratePdf={handleGeneratePdf}
-              generating={generating}
-              pdfError={pdfError}
-            />
+      {modulo === 'report' && draftReport && (
+        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+            <p className="text-brand-dark">Borrador de informe recuperado automáticamente.</p>
+            <Button variant="ghost" size="sm" onClick={descartarBorradorReport}>Descartar</Button>
           </div>
         </div>
-      </PageContainer>
+      )}
+
+      {modulo === 'quote' && (
+        <PageContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div><QuoteForm form={quoteForm} /></div>
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <QuotePreview control={quoteForm.control} onGeneratePdf={handleGenerateQuotePdf} generating={generatingQuote} pdfError={pdfErrorQuote} />
+            </div>
+          </div>
+        </PageContainer>
+      )}
+
+      {modulo === 'report' && (
+        <PageContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div><ReportForm form={reportForm} /></div>
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <ReportPreview control={reportForm.control} onGeneratePdf={handleGenerateReportPdf} generating={generatingReport} pdfError={pdfErrorReport} />
+            </div>
+          </div>
+        </PageContainer>
+      )}
 
       <Footer />
     </>
