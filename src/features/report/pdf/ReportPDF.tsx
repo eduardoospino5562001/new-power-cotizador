@@ -20,7 +20,7 @@ const styles = StyleSheet.create({
   grupoTitulo: { fontSize: 11, fontWeight: 700, marginTop: 12, marginBottom: 8, color: '#f97316', textTransform: 'uppercase' },
   grid: { flexDirection: 'row', flexWrap: 'wrap', gap: 4, marginBottom: 8 },
   gridCell: { width: '32%' },
-  foto: { width: '100%', height: 120, objectFit: 'cover', borderRadius: 2 },
+  foto: { width: '100%', height: 160, objectFit: 'cover', borderRadius: 2 },
   firma: { marginTop: 24, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
   firmaLabel: { fontSize: 9, color: '#44403c', textTransform: 'uppercase' },
   firmaNombre: { fontSize: 12, fontWeight: 600, marginTop: 4 },
@@ -35,7 +35,7 @@ interface ReportPDFProps {
 export function ReportPDF({ informe, logoSrc }: ReportPDFProps) {
   return (
     <Document>
-      <Page size="LETTER" style={styles.page} wrap>
+      <Page size="LETTER" style={styles.page}>
         <View fixed>
           <View style={styles.header}>
             <View style={styles.headerLeft}>

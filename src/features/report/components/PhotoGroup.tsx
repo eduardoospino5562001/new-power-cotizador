@@ -33,6 +33,8 @@ export function PhotoGroup({
   const undoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const lastRemovedRef = useRef<{ id: string; src: string } | null>(null)
   const [bajaResMap, setBajaResMap] = useState<Record<string, boolean>>({})
+  const [dragIndex, setDragIndex] = useState<number | null>(null)
+  const [dropTarget, setDropTarget] = useState<number | null>(null)
 
   const fotos = useWatch({ control, name: `grupos.${index}.fotos` }) ?? []
 
@@ -99,6 +101,33 @@ export function PhotoGroup({
       lastRemovedRef.current = null
     }
   }, [addFoto])
+
+  const handleDragStart = useCallback((idx: number) => {
+    setDragIndex(idx)
+  }, [])
+
+  const handleDragOver = useCallback((e: React.DragEvent, idx: number) => {
+    e.preventDefault()
+    setDropTarget(idx)
+  }, [])
+
+  const handleDragLeave = useCallback(() => {
+    setDropTarget(null)
+  }, [])
+
+  const handleDropReorder = useCallback(
+    (targetIdx: number) => {
+      if (dragIndex === null || dragIndex === targetIdx) {
+        setDragIndex(null)
+        setDropTarget(null)
+        return
+      }
+      moveFoto(dragIndex, targetIdx)
+      setDragIndex(null)
+      setDropTarget(null)
+    },
+    [dragIndex, moveFoto],
+  )
 
   return (
     <Card>
@@ -169,7 +198,17 @@ export function PhotoGroup({
             <p className="text-xs text-brand-gray mb-2">{fotos.length} foto(s)</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
               {fotos.map((foto: any, fotoIndex: number) => (
-                <div key={foto?.id ?? fotoIndex} className="relative group">
+                <div
+                  key={foto?.id ?? fotoIndex}
+                  draggable
+                  onDragStart={() => handleDragStart(fotoIndex)}
+                  onDragOver={(e) => handleDragOver(e, fotoIndex)}
+                  onDragLeave={handleDragLeave}
+                  onDrop={() => handleDropReorder(fotoIndex)}
+                  className={`relative group cursor-grab active:cursor-grabbing transition-shadow ${
+                    dropTarget === fotoIndex ? 'ring-2 ring-brand-orange rounded-lg' : ''
+                  } ${dragIndex === fotoIndex ? 'opacity-50' : ''}`}
+                >
                   {foto?.src && (
                     <img
                       src={foto.src}

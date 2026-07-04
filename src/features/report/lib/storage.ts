@@ -1,5 +1,24 @@
+const DB_NAME = 'new-power-reports'
+const DB_VERSION = 1
+const STORE_NAME = 'drafts'
 const DRAFT_KEY = 'npr-borrador'
 const NUMERO_KEY = 'npr-numero'
+
+function abrirDB(): Promise<IDBDatabase> {
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.open(DB_NAME, DB_VERSION)
+    req.onupgradeneeded = () => {
+      const db = req.result
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME)
+      }
+    }
+    req.onsuccess = () => resolve(req.result)
+    req.onerror = () => reject(req.error)
+  })
+}
+
+// --- Correlativo (localStorage, dato pequeño) ---
 
 export function getUltimoCorrelativo(): number {
   try {
@@ -26,23 +45,48 @@ export function avanzarNumero(): void {
   setUltimoCorrelativo(actual + 1)
 }
 
-export function guardarBorrador(data: unknown): void {
+// --- Borrador (IndexedDB, porque incluye fotos en base64) ---
+
+export async function guardarBorrador(data: unknown): Promise<void> {
   try {
-    localStorage.setItem(DRAFT_KEY, JSON.stringify(data))
-  } catch { }
+    const db = await abrirDB()
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    tx.objectStore(STORE_NAME).put(data, DRAFT_KEY)
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+    db.close()
+  } catch (e) {
+    console.warn('Error al guardar borrador en IndexedDB:', e)
+  }
 }
 
-export function cargarBorrador<T>(): T | null {
+export async function cargarBorrador<T>(): Promise<T | null> {
   try {
-    const raw = localStorage.getItem(DRAFT_KEY)
-    return raw ? (JSON.parse(raw) as T) : null
+    const db = await abrirDB()
+    const tx = db.transaction(STORE_NAME, 'readonly')
+    const req = tx.objectStore(STORE_NAME).get(DRAFT_KEY)
+    const result = await new Promise<T | undefined>((resolve, reject) => {
+      req.onsuccess = () => resolve(req.result)
+      req.onerror = () => reject(req.error)
+    })
+    db.close()
+    return result ?? null
   } catch {
     return null
   }
 }
 
-export function borrarBorrador(): void {
+export async function borrarBorrador(): Promise<void> {
   try {
-    localStorage.removeItem(DRAFT_KEY)
+    const db = await abrirDB()
+    const tx = db.transaction(STORE_NAME, 'readwrite')
+    tx.objectStore(STORE_NAME).delete(DRAFT_KEY)
+    await new Promise<void>((resolve, reject) => {
+      tx.oncomplete = () => resolve()
+      tx.onerror = () => reject(tx.error)
+    })
+    db.close()
   } catch { }
 }

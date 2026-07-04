@@ -36,8 +36,9 @@ function App() {
     const q = cargarBorradorQuote<CotizacionFormData>()
     if (q && q.numero) setDraftQuote(true)
 
-    const r = cargarBorradorReport<InformeFormData>()
-    if (r && r.fecha) setDraftReport(true)
+    cargarBorradorReport<InformeFormData>().then((r) => {
+      if (r && r.fecha) setDraftReport(true)
+    })
   }, [])
 
   const irAHome = useCallback(() => setModulo('home'), [])
@@ -48,8 +49,8 @@ function App() {
     quoteForm.empezarNueva()
   }
 
-  const descartarBorradorReport = () => {
-    borrarBorradorReport()
+  const descartarBorradorReport = async () => {
+    await borrarBorradorReport()
     setDraftReport(false)
     reportForm.empezarNueva()
   }

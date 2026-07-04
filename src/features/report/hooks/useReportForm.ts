@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from 'react'
+import { useEffect, useRef, useCallback, useState } from 'react'
 import { useForm, useFieldArray } from 'react-hook-form'
 import type { InformeFormData } from '../logic/validation'
 import { guardarBorrador, cargarBorrador, borrarBorrador, getSiguienteNumero } from '../lib/storage'
@@ -21,28 +21,25 @@ function crearValoresPorDefecto(): InformeFormData {
 const DRAFT_DEBOUNCE_MS = 1500
 
 export function useReportForm() {
-  const draftRestored = useRef(false)
+  const [ready, setReady] = useState(false)
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
-  const inicial = useCallback(() => {
-    if (!draftRestored.current) {
-      const draft = cargarBorrador<InformeFormData>()
-      if (draft && draft.fecha) {
-        draftRestored.current = true
-        return draft
-      }
-      draftRestored.current = true
-    }
-    return crearValoresPorDefecto()
-  }, [])
-
   const form = useForm<InformeFormData>({
-    defaultValues: inicial(),
+    defaultValues: crearValoresPorDefecto(),
     mode: 'onChange',
   })
 
   const { control, watch, reset } = form
   const { fields, append, remove, move } = useFieldArray({ control, name: 'grupos' })
+
+  useEffect(() => {
+    cargarBorrador<InformeFormData>().then((draft) => {
+      if (draft && draft.fecha) {
+        reset(draft)
+      }
+      setReady(true)
+    })
+  }, [reset])
 
   const addGrupo = () => {
     append({ id: crypto.randomUUID(), nombre: '', fotos: [] })
@@ -73,6 +70,7 @@ export function useReportForm() {
 
   return {
     ...form,
+    ready,
     grupos: fields,
     addGrupo,
     removeGrupo,
