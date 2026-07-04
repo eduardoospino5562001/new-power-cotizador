@@ -27,8 +27,8 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
   },
   logo: {
-    width: 50,
-    height: 50,
+    width: 57,
+    height: 57,
   },
   empresaNombre: {
     fontSize: 14,
@@ -43,11 +43,12 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 700,
     color: '#f97316',
+    marginBottom: 6,
   },
   numeroCotizacion: {
     fontSize: 10,
     color: '#44403c',
-    marginTop: 2,
+    marginBottom: 2,
   },
   seccionCliente: {
     marginBottom: 20,
