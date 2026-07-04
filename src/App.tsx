@@ -103,7 +103,7 @@ function App() {
     <>
       <Header>
         <button onClick={irAHome} className="flex items-center gap-1 text-sm text-brand-orange-light hover:text-white transition-colors">
-          <Home size={16} />
+          <Home size={20} />
         </button>
       </Header>
 
