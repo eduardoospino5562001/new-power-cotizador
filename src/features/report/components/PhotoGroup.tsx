@@ -172,13 +172,12 @@ export function PhotoGroup({
         >
           <Camera size={24} className="mx-auto mb-2 text-brand-gray" />
           <p className="text-sm text-brand-gray">Haz clic o arrastra fotos aquí</p>
-          <p className="text-xs text-brand-gray/60 mt-1">Cámara o galería</p>
+          <p className="text-xs text-brand-gray/60 mt-1">Cámara, galería, archivos</p>
           <input
             ref={fileInputRef}
             type="file"
             accept="image/*"
             multiple
-            capture="environment"
             className="hidden"
             onChange={handleFileChange}
           />
