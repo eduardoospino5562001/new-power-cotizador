@@ -1,7 +1,7 @@
 import { useRef } from 'react'
 import type { ComprobantesFormReturn } from '../hooks/useComprobantesForm'
 import { Card, Button, Select, NumberInput } from '@/components/ui'
-import { Upload, FileSpreadsheet } from 'lucide-react'
+import { Upload } from 'lucide-react'
 import { ACCOUNT_CODE_OPTIONS } from '../lib/excelUtils'
 
 interface ComprobantesFormProps {
@@ -15,7 +15,6 @@ const ACCOUNT_OPTIONS = Object.entries(ACCOUNT_CODE_OPTIONS).map(([key]) => ({
 
 export function ComprobantesForm({ form }: ComprobantesFormProps) {
   const sourceRef = useRef<HTMLInputElement>(null)
-  const templateRef = useRef<HTMLInputElement>(null)
 
   const {
     scanResult,
@@ -30,7 +29,6 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
     setStartConsecutive,
     setAccountMap,
     loadSource,
-    loadTemplate,
     generate,
     generating,
     error,
@@ -39,11 +37,6 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
   const handleSourceFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) loadSource(file)
-  }
-
-  const handleTemplateFile = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0]
-    if (file) loadTemplate(file)
   }
 
   const projects = scanResult ? Object.keys(scanResult.projects) : []
@@ -59,23 +52,15 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
   return (
     <section className="space-y-6">
       <Card>
-        <h2 className="text-lg font-bold text-brand-dark mb-4">Archivos</h2>
+        <h2 className="text-lg font-bold text-brand-dark mb-4">Archivo origen</h2>
         <div className="space-y-3">
           <div>
-            <p className="text-sm font-medium text-brand-dark mb-1">Archivo origen (Excel)</p>
+            <p className="text-sm font-medium text-brand-dark mb-1">Excel con datos de ingresos</p>
             <input ref={sourceRef} type="file" accept=".xlsx" onChange={handleSourceFile} className="hidden" />
             <Button type="button" variant="secondary" size="sm" onClick={() => sourceRef.current?.click()}>
-              <Upload size={16} className="mr-1" /> Seleccionar origen
+              <Upload size={16} className="mr-1" /> Buscar
             </Button>
             {form.sourceFile && <p className="text-xs text-brand-gray mt-1">{form.sourceFile.name}</p>}
-          </div>
-          <div>
-            <p className="text-sm font-medium text-brand-dark mb-1">Plantilla (Modelodeimportacion.xlsx)</p>
-            <input ref={templateRef} type="file" accept=".xlsx" onChange={handleTemplateFile} className="hidden" />
-            <Button type="button" variant="secondary" size="sm" onClick={() => templateRef.current?.click()}>
-              <FileSpreadsheet size={16} className="mr-1" /> Seleccionar plantilla
-            </Button>
-            {form.templateFile && <p className="text-xs text-brand-gray mt-1">{form.templateFile.name}</p>}
           </div>
         </div>
       </Card>
@@ -96,18 +81,24 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
                   {projectInfo.total} filas, {projectInfo.missingAmount} sin monto
                 </p>
               )}
-              <Select
-                label="Año"
-                options={years.map((y) => ({ value: String(y), label: String(y) }))}
-                value={selectedYear !== null ? String(selectedYear) : ''}
-                onChange={(e) => setSelectedYear(Number(e.target.value))}
-              />
-              <Select
-                label="Mes"
-                options={months.map((m) => ({ value: String(m), label: String(m).padStart(2, '0') }))}
-                value={selectedMonth !== null ? String(selectedMonth) : ''}
-                onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              />
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Select
+                    label="Año"
+                    options={years.map((y) => ({ value: String(y), label: String(y) }))}
+                    value={selectedYear !== null ? String(selectedYear) : ''}
+                    onChange={(e) => setSelectedYear(Number(e.target.value))}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Select
+                    label="Mes"
+                    options={months.map((m) => ({ value: String(m), label: String(m).padStart(2, '0') }))}
+                    value={selectedMonth !== null ? String(selectedMonth) : ''}
+                    onChange={(e) => setSelectedMonth(Number(e.target.value))}
+                  />
+                </div>
+              </div>
               <NumberInput
                 label="Consecutivo inicio"
                 value={startConsecutive}
@@ -127,7 +118,7 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
                 onChange={(e) => updateAccount('EFECTIVO', e.target.value)}
               />
               <Select
-                label="Cuenta bonificación"
+                label="Cuenta bonif."
                 options={ACCOUNT_OPTIONS}
                 value={Object.entries(ACCOUNT_CODE_OPTIONS).find(([, v]) => v === accountMap.BONIFICACION)?.[0] ?? 'BANCOLOMBIA'}
                 onChange={(e) => updateAccount('BONIFICACION', e.target.value)}
@@ -168,7 +159,7 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
       <Button
         className="w-full"
         onClick={generate}
-        disabled={!form.sourceFile || !form.templateFile || !selectedProject || generating}
+        disabled={!form.sourceFile || !selectedProject || generating}
       >
         {generating ? 'Generando...' : 'Generar Excel'}
       </Button>

@@ -5,9 +5,10 @@ import { scanWorkbook } from '../lib/excelReader'
 import { exportWorkbook } from '../lib/excelExporter'
 import { saveAs } from 'file-saver'
 
+const TEMPLATE_URL = '/Modelodeimportacion.xlsx'
+
 export function useComprobantesForm() {
   const [sourceFile, setSourceFile] = useState<File | null>(null)
-  const [templateFile, setTemplateFile] = useState<File | null>(null)
   const [scanResult, setScanResult] = useState<ScanResult | null>(null)
   const [selectedProject, setSelectedProject] = useState('')
   const [selectedYear, setSelectedYear] = useState<number | null>(null)
@@ -42,12 +43,8 @@ export function useComprobantesForm() {
     }
   }, [])
 
-  const loadTemplate = useCallback((file: File) => {
-    setTemplateFile(file)
-  }, [])
-
   const generate = useCallback(async () => {
-    if (!sourceFile || !templateFile || !selectedProject || selectedYear === null || selectedMonth === null) {
+    if (!sourceFile || !selectedProject || selectedYear === null || selectedMonth === null) {
       setError('Completa todos los campos requeridos.')
       return
     }
@@ -57,6 +54,11 @@ export function useComprobantesForm() {
     setSuccess(null)
 
     try {
+      const templateResp = await fetch(TEMPLATE_URL)
+      if (!templateResp.ok) throw new Error('No se encontro la plantilla.')
+      const templateBuf = await templateResp.arrayBuffer()
+      const templateFile = new File([templateBuf], 'Modelodeimportacion.xlsx')
+
       const result = await exportWorkbook(
         templateFile,
         sourceFile,
@@ -82,11 +84,10 @@ export function useComprobantesForm() {
     } finally {
       setGenerating(false)
     }
-  }, [sourceFile, templateFile, selectedProject, selectedYear, selectedMonth, startConsecutive, accountMap])
+  }, [sourceFile, selectedProject, selectedYear, selectedMonth, startConsecutive, accountMap])
 
   const reset = useCallback(() => {
     setSourceFile(null)
-    setTemplateFile(null)
     setScanResult(null)
     setSelectedProject('')
     setSelectedYear(null)
@@ -98,7 +99,6 @@ export function useComprobantesForm() {
 
   return {
     sourceFile,
-    templateFile,
     scanResult,
     selectedProject,
     selectedYear,
@@ -114,7 +114,6 @@ export function useComprobantesForm() {
     setStartConsecutive,
     setAccountMap,
     loadSource,
-    loadTemplate,
     generate,
     reset,
   }
