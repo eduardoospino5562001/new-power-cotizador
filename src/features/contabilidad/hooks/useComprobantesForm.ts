@@ -125,7 +125,7 @@ export function useComprobantesForm() {
         })
       }
 
-      setResult({
+      const genResult: GeneratedResult = {
         output: r.output,
         skippedMissingAmount: r.skippedMissingAmount,
         rows: r.rows,
@@ -136,9 +136,14 @@ export function useComprobantesForm() {
         month: selectedMonth,
         startConsecutive,
         accountMap,
-      })
+      }
 
-      setSuccess('Archivo generado exitosamente. Revisa el resultado antes de descargar.')
+      const blob = new Blob([r.output as BlobPart], {
+        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+      })
+      saveAs(blob, filename)
+      setResult(genResult)
+      setSuccess('Archivo generado y descargado. Revisa el contenido en el visor.')
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
