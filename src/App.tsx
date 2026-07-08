@@ -99,7 +99,7 @@ function App() {
                     <Calculator size={32} className="text-brand-orange-dark" />
                   </div>
                   <h3 className="text-lg font-bold text-brand-dark mb-2">Herramientas contables</h3>
-                  <p className="text-sm text-brand-gray">Genera comprobantes contables o convierte PDF de caja a Excel</p>
+                  <p className="text-sm text-brand-gray">Genera comprobantes contables desde Excel</p>
                 </Card>
               </button>
             </div>

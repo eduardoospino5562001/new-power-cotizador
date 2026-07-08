@@ -1,11 +1,23 @@
 import { useState, useCallback } from 'react'
-import type { ScanResult, AccountMap } from '../types'
+import type { ScanResult, AccountMap, SourceRow } from '../types'
 import { ACCOUNT_CODE_OPTIONS } from '../lib/excelUtils'
 import { scanWorkbook } from '../lib/excelReader'
 import { exportWorkbook } from '../lib/excelExporter'
 import { saveAs } from 'file-saver'
 
 const TEMPLATE_URL = '/Modelodeimportacion.xlsx'
+
+export interface GeneratedResult {
+  output: ArrayBuffer
+  skippedMissingAmount: number
+  rows: SourceRow[]
+  filename: string
+  project: string
+  year: number
+  month: number
+  startConsecutive: number
+  accountMap: AccountMap
+}
 
 export function useComprobantesForm() {
   const [sourceFile, setSourceFile] = useState<File | null>(null)
@@ -25,18 +37,20 @@ export function useComprobantesForm() {
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [result, setResult] = useState<GeneratedResult | null>(null)
 
   const loadSource = useCallback(async (file: File) => {
     setError(null)
     setSuccess(null)
+    setResult(null)
     setSourceFile(file)
     try {
-      const result = await scanWorkbook(file)
-      setScanResult(result)
-      const projects = Object.keys(result.projects)
+      const r = await scanWorkbook(file)
+      setScanResult(r)
+      const projects = Object.keys(r.projects)
       setSelectedProject(projects[0])
-      setSelectedYear(result.years[0])
-      setSelectedMonth(result.months[0])
+      setSelectedYear(r.years[0])
+      setSelectedMonth(r.months[0])
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
       setScanResult(null)
@@ -52,6 +66,7 @@ export function useComprobantesForm() {
     setGenerating(true)
     setError(null)
     setSuccess(null)
+    setResult(null)
 
     try {
       const templateResp = await fetch(TEMPLATE_URL)
@@ -59,7 +74,7 @@ export function useComprobantesForm() {
       const templateBuf = await templateResp.arrayBuffer()
       const templateFile = new File([templateBuf], 'Modelodeimportacion.xlsx')
 
-      const result = await exportWorkbook(
+      const r = await exportWorkbook(
         templateFile,
         sourceFile,
         startConsecutive,
@@ -69,22 +84,35 @@ export function useComprobantesForm() {
         accountMap
       )
 
-      const blob = new Blob([result.output as BlobPart], {
-        type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-      })
       const filename = `comprobante_${selectedProject}_${selectedYear}_${String(selectedMonth).padStart(2, '0')}.xlsx`
-      saveAs(blob, filename)
 
-      const msg = result.skippedMissingAmount > 0
-        ? `Archivo generado. Se omitieron ${result.skippedMissingAmount} filas sin monto.`
-        : 'Archivo generado exitosamente.'
-      setSuccess(msg)
+      setResult({
+        output: r.output,
+        skippedMissingAmount: r.skippedMissingAmount,
+        rows: r.rows,
+        filename,
+        project: selectedProject,
+        year: selectedYear,
+        month: selectedMonth,
+        startConsecutive,
+        accountMap,
+      })
+
+      setSuccess('Archivo generado exitosamente. Revisa el resultado antes de descargar.')
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err))
     } finally {
       setGenerating(false)
     }
   }, [sourceFile, selectedProject, selectedYear, selectedMonth, startConsecutive, accountMap])
+
+  const download = useCallback(() => {
+    if (!result) return
+    const blob = new Blob([result.output as BlobPart], {
+      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    })
+    saveAs(blob, result.filename)
+  }, [result])
 
   const reset = useCallback(() => {
     setSourceFile(null)
@@ -95,6 +123,13 @@ export function useComprobantesForm() {
     setStartConsecutive(1)
     setError(null)
     setSuccess(null)
+    setResult(null)
+  }, [])
+
+  const backToForm = useCallback(() => {
+    setResult(null)
+    setSuccess(null)
+    setError(null)
   }, [])
 
   return {
@@ -108,6 +143,7 @@ export function useComprobantesForm() {
     generating,
     error,
     success,
+    result,
     setSelectedProject,
     setSelectedYear,
     setSelectedMonth,
@@ -115,7 +151,9 @@ export function useComprobantesForm() {
     setAccountMap,
     loadSource,
     generate,
+    download,
     reset,
+    backToForm,
   }
 }
 

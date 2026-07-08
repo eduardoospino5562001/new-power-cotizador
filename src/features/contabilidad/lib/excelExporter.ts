@@ -1,5 +1,5 @@
 import * as XLSX from 'xlsx'
-import type { AccountMap } from '../types'
+import type { AccountMap, SourceRow } from '../types'
 import { ACCOUNT, debitAccountForMedium } from './excelUtils'
 import { collectSourceRows } from './excelReader'
 
@@ -11,7 +11,7 @@ export async function exportWorkbook(
   year: number,
   month: number,
   accountMap: AccountMap
-): Promise<{ output: ArrayBuffer; skippedMissingAmount: number }> {
+): Promise<{ output: ArrayBuffer; skippedMissingAmount: number; rows: SourceRow[] }> {
   const [templateBuf, sourceBuf] = await Promise.all([
     templateFile.arrayBuffer(),
     sourceFile.arrayBuffer(),
@@ -151,5 +151,5 @@ export async function exportWorkbook(
 
   const output = XLSX.write(templateWb, { type: 'array', bookType: 'xlsx', cellDates: true })
 
-  return { output: output as ArrayBuffer, skippedMissingAmount }
+  return { output: output as ArrayBuffer, skippedMissingAmount, rows }
 }
