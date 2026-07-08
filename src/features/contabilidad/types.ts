@@ -23,26 +23,6 @@ export interface AccountMap {
   DAVIVIENDA: number
 }
 
-export interface ComprobanteParams {
-  sourceFile: File
-  templateFile: File
-  startConsecutive: number
-  selectedProject: string
-  year: number
-  month: number
-  accountMap: AccountMap
-}
-
-export interface CashboxRecord {
-  recordNumber: number
-  consecutive: number
-  lot: string
-  paymentMethod: string
-  paymentConcept: string
-  amount: number
-  advisor: string
-}
-
 export interface ScanResult {
   projects: Record<string, ProjectInfo>
   years: number[]
@@ -50,16 +30,31 @@ export interface ScanResult {
 }
 
 export interface OutputRow {
-  consecutive: number
-  type: 'Débito' | 'Crédito'
-  date: Date
-  currency: string
-  account: number | string
-  thirdId: string | null
-  docType: string | null
-  receipt: string | null
-  installment: number | null
-  dueDate: Date | null
-  description: string
-  amount: number
+  tipoComprobante: number
+  consecutivo: number
+  fechaElaboracion: Date
+  siglaMoneda: string
+  tasaCambio: null
+  codigoCuenta: number | string
+  identificacionTercero: string | null
+  sucursal: null
+  codigoProducto: null
+  codigoBodega: null
+  accion: null
+  cantidadProducto: null
+  prefijo: string | null
+  reciboConsecutivo: string | null
+  numeroCuota: number | null
+  fechaVencimiento: Date | null
+  codigoImpuesto: null
+  codigoGrupoActivo: null
+  codigoActivoFijo: null
+  descripcion: string
+  codigoCentroCostos: null
+  debito: number | null
+  credito: number | null
+  observaciones: null
+  baseGravable: null
+  baseExenta: null
+  mesCierre: null
 }
