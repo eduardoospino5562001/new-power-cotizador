@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header, Footer, PageContainer } from '@/components/layout'
 import { Button, Card } from '@/components/ui'
-import { FileText, Receipt, Home } from 'lucide-react'
+import { FileText, Receipt, Calculator, Home } from 'lucide-react'
 
 import { useQuoteForm } from '@/features/quote/hooks/useQuoteForm'
 import { useGeneratePdf } from '@/features/quote/hooks/useGeneratePdf'
@@ -19,7 +19,9 @@ import { cargarBorrador as cargarBorradorReport, borrarBorrador as borrarBorrado
 import type { InformeFormData } from '@/features/report/logic/validation'
 import type { InformeTecnico } from '@/features/report/types'
 
-type Modulo = 'home' | 'quote' | 'report'
+import { Contabilidad } from '@/features/contabilidad/Contabilidad'
+
+type Modulo = 'home' | 'quote' | 'report' | 'contabilidad'
 
 function App() {
   const [modulo, setModulo] = useState<Modulo>('home')
@@ -72,7 +74,7 @@ function App() {
             <h2 className="text-2xl font-bold text-brand-dark text-center">
               ¿Qué deseas crear?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 w-full max-w-2xl">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
               <button onClick={() => setModulo('quote')} className="group">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -89,6 +91,15 @@ function App() {
                   </div>
                   <h3 className="text-lg font-bold text-brand-dark mb-2">Nuevo informe técnico</h3>
                   <p className="text-sm text-brand-gray">Crea un informe técnico con registro fotográfico y observaciones</p>
+                </Card>
+              </button>
+              <button onClick={() => setModulo('contabilidad')} className="group">
+                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Calculator size={32} className="text-brand-orange-dark" />
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-dark mb-2">Herramientas contables</h3>
+                  <p className="text-sm text-brand-gray">Genera comprobantes contables o convierte PDF de caja a Excel</p>
                 </Card>
               </button>
             </div>
@@ -144,6 +155,12 @@ function App() {
               <ReportPreview control={reportForm.control} onGeneratePdf={handleGenerateReportPdf} generating={generatingReport} pdfError={pdfErrorReport} />
             </div>
           </div>
+        </PageContainer>
+      )}
+
+      {modulo === 'contabilidad' && (
+        <PageContainer>
+          <Contabilidad />
         </PageContainer>
       )}
 
