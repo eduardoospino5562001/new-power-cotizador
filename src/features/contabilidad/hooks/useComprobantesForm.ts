@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import type { ScanResult, AccountMap, SourceRow } from '../types'
-import { ACCOUNT_CODE_OPTIONS } from '../lib/excelUtils'
+import type { ScanResult, AccountMap, SourceRow, OutputRow } from '../types'
+import { ACCOUNT_CODE_OPTIONS, ACCOUNT, debitAccountForMedium } from '../lib/excelUtils'
 import { scanWorkbook } from '../lib/excelReader'
 import { exportWorkbook } from '../lib/excelExporter'
 import { saveAs } from 'file-saver'
@@ -11,6 +11,7 @@ export interface GeneratedResult {
   output: ArrayBuffer
   skippedMissingAmount: number
   rows: SourceRow[]
+  outputRows: OutputRow[]
   filename: string
   project: string
   year: number
@@ -86,10 +87,49 @@ export function useComprobantesForm() {
 
       const filename = `comprobante_${selectedProject}_${selectedYear}_${String(selectedMonth).padStart(2, '0')}.xlsx`
 
+      const outputRows: OutputRow[] = []
+      for (let i = 0; i < r.rows.length; i++) {
+        const src = r.rows[i]
+        const consecutive = startConsecutive + i
+        const debitAccount = debitAccountForMedium(src.medium, accountMap)
+        const label = src.label
+        const description = label ? `${label}-${src.lot}` : src.lot
+
+        outputRows.push({
+          consecutive,
+          type: 'Débito',
+          date: src.date,
+          currency: 'COP',
+          account: debitAccount,
+          thirdId: src.thirdId,
+          docType: null,
+          receipt: null,
+          installment: null,
+          dueDate: null,
+          description: '',
+          amount: src.amount,
+        })
+        outputRows.push({
+          consecutive,
+          type: 'Crédito',
+          date: src.date,
+          currency: 'COP',
+          account: ACCOUNT.CREDIT_FUND,
+          thirdId: src.thirdId,
+          docType: 'RCBO',
+          receipt: src.receipt,
+          installment: src.installment,
+          dueDate: src.date,
+          description,
+          amount: src.amount,
+        })
+      }
+
       setResult({
         output: r.output,
         skippedMissingAmount: r.skippedMissingAmount,
         rows: r.rows,
+        outputRows,
         filename,
         project: selectedProject,
         year: selectedYear,

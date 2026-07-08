@@ -48,3 +48,18 @@ export interface ScanResult {
   years: number[]
   months: number[]
 }
+
+export interface OutputRow {
+  consecutive: number
+  type: 'Débito' | 'Crédito'
+  date: Date
+  currency: string
+  account: number | string
+  thirdId: string | null
+  docType: string | null
+  receipt: string | null
+  installment: number | null
+  dueDate: Date | null
+  description: string
+  amount: number
+}
