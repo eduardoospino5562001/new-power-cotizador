@@ -146,6 +146,9 @@ export async function exportWorkbook(
     helperWs[`C${helperRef}`] = makeCell(debitAccount)
   }
 
+  delete mainWs['!comments']
+  delete helperWs['!comments']
+
   const range = XLSX.utils.decode_range(`A1:W${requiredRows}`)
   if (!mainWs['!ref']) mainWs['!ref'] = XLSX.utils.encode_range(range)
 
