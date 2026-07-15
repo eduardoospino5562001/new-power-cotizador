@@ -6,12 +6,10 @@ export interface Cliente {
   telefono: string
 }
 
-export interface InformacionLogistica {
-  lugarDespacho: string
-  lugarEntrega: string
-  responsableTransporte: string
-  vehiculo: string
-  placa: string
+export interface LogisticaItem {
+  id: string
+  nombre: string
+  valor: string
 }
 
 export interface DetalleItem {
@@ -38,7 +36,7 @@ export interface Remision {
   pedido: string
   contrato: string
   cliente: Cliente
-  logistica: InformacionLogistica
+  logistica: LogisticaItem[]
   detalles: DetalleItem[]
   observaciones: string
   entrega: FirmaInfo

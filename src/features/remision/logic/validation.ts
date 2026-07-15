@@ -1,5 +1,11 @@
 import { z } from 'zod/v3'
 
+export const logisticaItemSchema = z.object({
+  id: z.string(),
+  nombre: z.string().min(1, 'El nombre es obligatorio'),
+  valor: z.string(),
+})
+
 export const detalleItemSchema = z.object({
   id: z.string(),
   cantidad: z.string(),
@@ -30,13 +36,7 @@ export const remisionSchema = z.object({
     ciudad: z.string().optional().default(''),
     telefono: z.string().optional().default(''),
   }),
-  logistica: z.object({
-    lugarDespacho: z.string().default('Villavicencio'),
-    lugarEntrega: z.string().default('Medellín'),
-    responsableTransporte: z.string().optional().default(''),
-    vehiculo: z.string().optional().default(''),
-    placa: z.string().optional().default(''),
-  }),
+  logistica: z.array(logisticaItemSchema),
   detalles: z.array(detalleItemSchema),
   observaciones: z.string().optional().default(''),
   entrega: firmaSchema,

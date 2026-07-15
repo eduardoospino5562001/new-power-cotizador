@@ -17,6 +17,7 @@ export function RemisionPreview({ control, onGeneratePdf, generating, pdfError }
 
   if (!data) return null
 
+  const logistica = data.logistica?.filter((l) => l?.nombre) ?? []
   const detalles = data.detalles?.filter((d) => d?.descripcion) ?? []
 
   return (
@@ -52,11 +53,9 @@ export function RemisionPreview({ control, onGeneratePdf, generating, pdfError }
 
         <div className="bg-brand-light p-3 rounded mb-6">
           <p className="text-xs font-bold text-brand-gray uppercase mb-1">INFORMACIÓN LOGÍSTICA</p>
-          <p className="text-xs text-brand-gray">Lugar despacho: {data.logistica?.lugarDespacho || '—'}</p>
-          <p className="text-xs text-brand-gray">Lugar entrega: {data.logistica?.lugarEntrega || '—'}</p>
-          {data.logistica?.responsableTransporte && <p className="text-xs text-brand-gray">Responsable: {data.logistica.responsableTransporte}</p>}
-          {data.logistica?.vehiculo && <p className="text-xs text-brand-gray">Vehículo: {data.logistica.vehiculo}</p>}
-          {data.logistica?.placa && <p className="text-xs text-brand-gray">Placa: {data.logistica.placa}</p>}
+          {logistica.map((l) => (
+            <p key={l.id} className="text-xs text-brand-gray">{l.nombre}: {l.valor || '—'}</p>
+          ))}
         </div>
 
         <div className="mb-6">

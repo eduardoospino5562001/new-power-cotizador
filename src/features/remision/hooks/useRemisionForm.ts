@@ -6,10 +6,25 @@ import { guardarBorrador, cargarBorrador, borrarBorrador } from '../lib/storage'
 
 const hoy = () => new Date().toISOString().split('T')[0]
 
+let logIdCounter = 0
 let detIdCounter = 0
+function nextLogId() {
+  logIdCounter++
+  return `log-${logIdCounter}`
+}
 function nextDetId() {
   detIdCounter++
   return `det-${detIdCounter}`
+}
+
+function crearLogisticaDefault() {
+  return [
+    { id: nextLogId(), nombre: 'Lugar despacho', valor: 'Villavicencio' },
+    { id: nextLogId(), nombre: 'Lugar entrega', valor: 'Medellín' },
+    { id: nextLogId(), nombre: 'Responsable transporte', valor: '' },
+    { id: nextLogId(), nombre: 'Vehículo', valor: '' },
+    { id: nextLogId(), nombre: 'Placa', valor: '' },
+  ]
 }
 
 function crearDetallesDefault() {
@@ -31,13 +46,7 @@ function crearValoresPorDefecto(): RemisionFormData {
       ciudad: '',
       telefono: '',
     },
-    logistica: {
-      lugarDespacho: 'Villavicencio',
-      lugarEntrega: 'Medellín',
-      responsableTransporte: '',
-      vehiculo: '',
-      placa: '',
-    },
+    logistica: crearLogisticaDefault(),
     detalles: crearDetallesDefault(),
     observaciones: '',
     entrega: { firma: '', nombre: '', cargo: '', documento: '', fecha: '', hora: '' },
@@ -71,11 +80,11 @@ export function useRemisionForm() {
 
   const { watch, reset, control, getValues } = form
 
-  const detFieldArray = useFieldArray({
-    control,
-    name: 'detalles',
-  })
+  const logFieldArray = useFieldArray({ control, name: 'logistica' })
+  const detFieldArray = useFieldArray({ control, name: 'detalles' })
 
+  const appendLogRef = useRef(logFieldArray.append)
+  appendLogRef.current = logFieldArray.append
   const appendDetRef = useRef(detFieldArray.append)
   appendDetRef.current = detFieldArray.append
 
@@ -83,6 +92,9 @@ export function useRemisionForm() {
     if (inicializado.current) return
     inicializado.current = true
     const values = getValues()
+    if (!values.logistica || values.logistica.length === 0) {
+      crearLogisticaDefault().forEach((l) => appendLogRef.current(l))
+    }
     if (!values.detalles || values.detalles.length === 0) {
       crearDetallesDefault().forEach((d) => appendDetRef.current(d))
     }
@@ -106,6 +118,9 @@ export function useRemisionForm() {
   return {
     ...form,
     control,
+    logFields: logFieldArray.fields,
+    appendLog: logFieldArray.append,
+    removeLog: logFieldArray.remove,
     detFields: detFieldArray.fields,
     appendDet: detFieldArray.append,
     removeDet: detFieldArray.remove,

@@ -11,31 +11,29 @@ export function RemisionForm({ form }: RemisionFormProps) {
   const {
     register,
     empezarNueva,
+    logFields,
+    appendLog,
+    removeLog,
     detFields,
     appendDet,
     removeDet,
   } = form
 
+  const [selectedLogs, setSelectedLogs] = useState<Set<number>>(new Set())
   const [selectedDets, setSelectedDets] = useState<Set<number>>(new Set())
 
-  const toggleDet = (index: number) => {
-    setSelectedDets((prev) => {
-      const next = new Set(prev)
-      if (next.has(index)) next.delete(index)
-      else next.add(index)
-      return next
-    })
+  const toggleSel = (set: React.Dispatch<React.SetStateAction<Set<number>>>, index: number) =>
+    set((prev) => { const n = new Set(prev); if (n.has(index)) n.delete(index); else n.add(index); return n })
+
+  const eliminarSeleccionados = (set: React.Dispatch<React.SetStateAction<Set<number>>>, remove: (i: number) => void, sel: Set<number>) => {
+    const sorted = [...sel].sort((a, b) => b - a)
+    sorted.forEach((i) => remove(i))
+    set(new Set())
   }
 
-  const eliminarSeleccionados = () => {
-    const sorted = [...selectedDets].sort((a, b) => b - a)
-    sorted.forEach((i) => removeDet(i))
-    setSelectedDets(new Set())
-  }
-
-  const eliminarTodos = () => {
-    for (let i = detFields.length - 1; i >= 0; i--) removeDet(i)
-    setSelectedDets(new Set())
+  const eliminarTodos = (set: React.Dispatch<React.SetStateAction<Set<number>>>, remove: (i: number) => void, len: number) => {
+    for (let i = len - 1; i >= 0; i--) remove(i)
+    set(new Set())
   }
 
   return (
@@ -65,13 +63,35 @@ export function RemisionForm({ form }: RemisionFormProps) {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-bold text-brand-dark mb-4">Información Logística</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <Input label="Lugar despacho" {...register('logistica.lugarDespacho')} />
-          <Input label="Lugar entrega" {...register('logistica.lugarEntrega')} />
-          <Input label="Responsable transporte" {...register('logistica.responsableTransporte')} placeholder="Nombre del responsable" />
-          <Input label="Vehículo" {...register('logistica.vehiculo')} placeholder="Tipo de vehículo" />
-          <Input label="Placa" {...register('logistica.placa')} placeholder="Placa del vehículo" />
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-brand-dark">Información Logística</h2>
+          <div className="flex items-center gap-2">
+            {selectedLogs.size > 0 && (
+              <Button type="button" variant="ghost" size="sm" onClick={() => eliminarSeleccionados(setSelectedLogs, removeLog, selectedLogs)}>
+                <Trash2 size={16} className="mr-1" /> ({selectedLogs.size})
+              </Button>
+            )}
+            <Button type="button" variant="ghost" size="sm" onClick={() => eliminarTodos(setSelectedLogs, removeLog, logFields.length)}>
+              <Trash2 size={16} className="mr-1" /> Todas
+            </Button>
+            <Button type="button" variant="ghost" size="sm" onClick={() => appendLog({ id: `log-${Date.now()}`, nombre: '', valor: '' })}>
+              <Plus size={16} className="mr-1" /> Agregar
+            </Button>
+          </div>
+        </div>
+        <div className="space-y-2">
+          {logFields.map((field, index) => (
+            <div key={field.id} className="flex items-start gap-2">
+              <input type="checkbox" checked={selectedLogs.has(index)} onChange={() => toggleSel(setSelectedLogs, index)} className="accent-brand-orange mt-2 shrink-0" />
+              <div className="flex-1">
+                <Input placeholder="Nombre" {...register(`logistica.${index}.nombre` as const)} />
+              </div>
+              <div className="flex-[2]">
+                <Input placeholder="Valor" {...register(`logistica.${index}.valor` as const)} />
+              </div>
+              <button type="button" onClick={() => { removeLog(index); setSelectedLogs((prev) => { const n = new Set(prev); n.delete(index); return n }) }} className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors" title="Eliminar"><Trash2 size={18} /></button>
+            </div>
+          ))}
         </div>
       </Card>
 
@@ -80,11 +100,11 @@ export function RemisionForm({ form }: RemisionFormProps) {
           <h2 className="text-lg font-bold text-brand-dark">Detalle de Entrega</h2>
           <div className="flex items-center gap-2">
             {selectedDets.size > 0 && (
-              <Button type="button" variant="ghost" size="sm" onClick={eliminarSeleccionados}>
+              <Button type="button" variant="ghost" size="sm" onClick={() => eliminarSeleccionados(setSelectedDets, removeDet, selectedDets)}>
                 <Trash2 size={16} className="mr-1" /> ({selectedDets.size})
               </Button>
             )}
-            <Button type="button" variant="ghost" size="sm" onClick={eliminarTodos}>
+            <Button type="button" variant="ghost" size="sm" onClick={() => eliminarTodos(setSelectedDets, removeDet, detFields.length)}>
               <Trash2 size={16} className="mr-1" /> Todas
             </Button>
             <Button type="button" variant="ghost" size="sm" onClick={() => appendDet({ id: `det-${Date.now()}`, cantidad: '1', codigo: '', descripcion: '', serial: '', observaciones: '' })}>
@@ -96,7 +116,7 @@ export function RemisionForm({ form }: RemisionFormProps) {
           {detFields.map((field, index) => (
             <div key={field.id} className="border border-brand-orange-light rounded-lg p-3">
               <div className="flex items-start gap-2 mb-2">
-                <input type="checkbox" checked={selectedDets.has(index)} onChange={() => toggleDet(index)} className="accent-brand-orange mt-2 shrink-0" />
+                <input type="checkbox" checked={selectedDets.has(index)} onChange={() => toggleSel(setSelectedDets, index)} className="accent-brand-orange mt-2 shrink-0" />
                 <div className="grid grid-cols-5 gap-2 flex-1">
                   <Input placeholder="Cant." {...register(`detalles.${index}.cantidad` as const)} />
                   <Input placeholder="Código" {...register(`detalles.${index}.codigo` as const)} />

@@ -69,11 +69,9 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
 
         <View style={styles.seccion}>
           <Text style={styles.seccionLabel}>INFORMACIÓN LOGÍSTICA</Text>
-          <Text style={styles.seccionText}>Lugar despacho: {remision.logistica.lugarDespacho}</Text>
-          <Text style={styles.seccionText}>Lugar entrega: {remision.logistica.lugarEntrega}</Text>
-          {remision.logistica.responsableTransporte && <Text style={styles.seccionText}>Responsable transporte: {remision.logistica.responsableTransporte}</Text>}
-          {remision.logistica.vehiculo && <Text style={styles.seccionText}>Vehículo: {remision.logistica.vehiculo}</Text>}
-          {remision.logistica.placa && <Text style={styles.seccionText}>Placa: {remision.logistica.placa}</Text>}
+          {remision.logistica.map((l) => (
+            <Text key={l.id} style={styles.seccionText}>{l.nombre}: {l.valor || '—'}</Text>
+          ))}
         </View>
 
         <View>

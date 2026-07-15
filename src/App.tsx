@@ -147,13 +147,11 @@ function App() {
         ciudad: data.cliente.ciudad || '',
         telefono: data.cliente.telefono || '',
       },
-      logistica: {
-        lugarDespacho: data.logistica.lugarDespacho || '',
-        lugarEntrega: data.logistica.lugarEntrega || '',
-        responsableTransporte: data.logistica.responsableTransporte || '',
-        vehiculo: data.logistica.vehiculo || '',
-        placa: data.logistica.placa || '',
-      },
+      logistica: (data.logistica || []).map((l) => ({
+        id: l.id,
+        nombre: l.nombre,
+        valor: l.valor ?? '',
+      })),
       detalles: (data.detalles || []).map((d) => ({
         id: d.id,
         cantidad: d.cantidad || '',
