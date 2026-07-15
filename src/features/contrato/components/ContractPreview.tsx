@@ -2,24 +2,8 @@ import { useWatch } from 'react-hook-form'
 import type { Control } from 'react-hook-form'
 import type { ContratoFormData } from '../logic/validation'
 import { Button } from '@/components/ui'
-import { calcularSaldo } from '../logic/calculations'
 import { formatCurrency, formatDate } from '../lib/format'
 import Logo from '@/assets/logo.jpeg'
-
-const CLAUSULAS = [
-  { titulo: 'PRIMERA. OBJETO', texto: 'EL VENDEDOR vende a EL COMPRADOR una planta eléctrica de segunda, con las características descritas en las especificaciones del equipo. Lo anterior conforme a la cotización No. correspondiente.' },
-  { titulo: 'SEGUNDA. VALOR', texto: 'El valor total de la compraventa es el indicado en el resumen económico del presente contrato.' },
-  { titulo: 'TERCERA. FORMA DE PAGO', texto: 'EL COMPRADOR pagará el valor del contrato según lo establecido en el resumen económico: un pago inicial y el saldo en la fecha acordada.' },
-  { titulo: 'CUARTA. ENTREGA', texto: 'EL VENDEDOR hará entrega de la planta eléctrica en la ciudad de Medellín, una vez se cumplan las condiciones de pago pactadas entre las partes.' },
-  { titulo: 'QUINTA. GARANTÍA', texto: 'La planta eléctrica cuenta con una garantía de quinientas (500) horas de funcionamiento o tres (3) meses, lo que ocurra primero.' },
-  { titulo: 'SEXTA. INSTALACIÓN Y TRANSPORTE', texto: 'En caso de requerirse instalación, los gastos de transporte, viáticos y demás costos asociados serán asumidos por EL COMPRADOR.' },
-  { titulo: 'SÉPTIMA. ESTADO DEL BIEN', texto: 'EL COMPRADOR declara conocer que el equipo objeto de este contrato corresponde a una planta eléctrica usada (de segunda), aceptando su estado de funcionamiento al momento de la entrega.' },
-  { titulo: 'OCTAVA. PERFECCIONAMIENTO', texto: 'El presente contrato se entiende perfeccionado con la firma de las partes.' },
-  { titulo: 'NOVENA. OBLIGACIONES DEL VENDEDOR', texto: 'EL VENDEDOR se obliga a entregar el equipo en el estado acordado, con todos sus accesorios y documentación asociada.' },
-  { titulo: 'DÉCIMA. OBLIGACIONES DEL COMPRADOR', texto: 'EL COMPRADOR se obliga a pagar el valor acordado en la forma y plazos estipulados.' },
-  { titulo: 'UNDÉCIMA. INCUMPLIMIENTO', texto: 'En caso de incumplimiento por cualquiera de las partes, la parte afectada podrá exigir el cumplimiento o la resolución del contrato.' },
-  { titulo: 'DUODÉCIMA. CLÁUSULA PENAL', texto: 'En caso de mora en el pago, EL COMPRADOR pagará un interés moratorio equivalente al máximo legal permitido.' },
-]
 
 interface ContractPreviewProps {
   control: Control<ContratoFormData>
@@ -33,12 +17,9 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
 
   if (!data) return null
 
-  const saldo = calcularSaldo(
-    Number(data.economico?.valorTotal) || 0,
-    Number(data.economico?.pagoInicial) || 0,
-  )
-
+  const saldo = Number(data.economico?.saldo) || 0
   const specs = data.especificaciones?.filter((s) => s?.nombre) ?? []
+  const clausulas = data.clausulas?.filter((c) => c?.titulo) ?? []
 
   return (
     <section className="space-y-6">
@@ -103,8 +84,8 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
         <div className="mb-6">
           <h3 className="text-sm font-bold text-brand-dark mb-3 border-b border-brand-orange-light pb-1">CLÁUSULAS</h3>
           <div className="space-y-3">
-            {CLAUSULAS.map((c, i) => (
-              <div key={i}>
+            {clausulas.map((c) => (
+              <div key={c.id}>
                 <p className="text-xs font-bold text-brand-dark">{c.titulo}</p>
                 <p className="text-xs text-brand-gray">{c.texto}</p>
               </div>

@@ -1,6 +1,5 @@
 import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/renderer'
 import type { ContratoCompraventa } from '../types'
-import { calcularSaldo } from '../logic/calculations'
 
 const styles = StyleSheet.create({
   page: { padding: 56, fontFamily: 'Inter', fontSize: 10, color: '#1c1917', lineHeight: 1.4 },
@@ -34,28 +33,13 @@ const styles = StyleSheet.create({
 
 const fmt = (n: number) => '$ ' + Math.round(n).toLocaleString('es-CO')
 
-const CLAUSULAS = [
-  { titulo: 'PRIMERA. OBJETO', texto: 'EL VENDEDOR vende a EL COMPRADOR una planta eléctrica de segunda, con las características descritas en las especificaciones del equipo. Lo anterior conforme a la cotización No. correspondiente.' },
-  { titulo: 'SEGUNDA. VALOR', texto: 'El valor total de la compraventa es el indicado en el resumen económico del presente contrato.' },
-  { titulo: 'TERCERA. FORMA DE PAGO', texto: 'EL COMPRADOR pagará el valor del contrato según lo establecido en el resumen económico: un pago inicial y el saldo en la fecha acordada.' },
-  { titulo: 'CUARTA. ENTREGA', texto: 'EL VENDEDOR hará entrega de la planta eléctrica en la ciudad de Medellín, una vez se cumplan las condiciones de pago pactadas entre las partes.' },
-  { titulo: 'QUINTA. GARANTÍA', texto: 'La planta eléctrica cuenta con una garantía de quinientas (500) horas de funcionamiento o tres (3) meses, lo que ocurra primero.' },
-  { titulo: 'SEXTA. INSTALACIÓN Y TRANSPORTE', texto: 'En caso de requerirse instalación, los gastos de transporte, viáticos y demás costos asociados serán asumidos por EL COMPRADOR.' },
-  { titulo: 'SÉPTIMA. ESTADO DEL BIEN', texto: 'EL COMPRADOR declara conocer que el equipo objeto de este contrato corresponde a una planta eléctrica usada (de segunda), aceptando su estado de funcionamiento al momento de la entrega.' },
-  { titulo: 'OCTAVA. PERFECCIONAMIENTO', texto: 'El presente contrato se entiende perfeccionado con la firma de las partes.' },
-  { titulo: 'NOVENA. OBLIGACIONES DEL VENDEDOR', texto: 'EL VENDEDOR se obliga a entregar el equipo en el estado acordado, con todos sus accesorios y documentación asociada.' },
-  { titulo: 'DÉCIMA. OBLIGACIONES DEL COMPRADOR', texto: 'EL COMPRADOR se obliga a pagar el valor acordado en la forma y plazos estipulados.' },
-  { titulo: 'UNDÉCIMA. INCUMPLIMIENTO', texto: 'En caso de incumplimiento por cualquiera de las partes, la parte afectada podrá exigir el cumplimiento o la resolución del contrato.' },
-  { titulo: 'DUODÉCIMA. CLÁUSULA PENAL', texto: 'En caso de mora en el pago, EL COMPRADOR pagará un interés moratorio equivalente al máximo legal permitido.' },
-]
-
 interface ContractPDFProps {
   contrato: ContratoCompraventa
   logoSrc?: string
 }
 
 export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
-  const saldo = calcularSaldo(contrato.economico.valorTotal, contrato.economico.pagoInicial)
+  const saldo = contrato.economico.saldo
 
   return (
     <Document>
@@ -119,8 +103,8 @@ export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
 
         <View>
           <Text style={styles.tablaTitulo}>CLÁUSULAS</Text>
-          {CLAUSULAS.map((c, i) => (
-            <View key={i}>
+          {contrato.clausulas.map((c) => (
+            <View key={c.id}>
               <Text style={styles.clausulaTitulo}>{c.titulo}</Text>
               <Text style={styles.clausulaTexto}>{c.texto}</Text>
             </View>

@@ -22,6 +22,12 @@ export interface EspecificacionItem {
   valor: string
 }
 
+export interface ClausulaItem {
+  id: string
+  titulo: string
+  texto: string
+}
+
 export interface ResumenEconomico {
   valorTotal: number
   pagoInicial: number
@@ -35,6 +41,7 @@ export interface ContratoCompraventa {
   vendedor: Vendedor
   comprador: Comprador
   especificaciones: EspecificacionItem[]
+  clausulas: ClausulaItem[]
   economico: ResumenEconomico
   observaciones: string
 }

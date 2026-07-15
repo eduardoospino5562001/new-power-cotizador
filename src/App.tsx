@@ -97,6 +97,11 @@ function App() {
         nombre: e.nombre,
         valor: e.valor ?? '',
       })),
+      clausulas: (data.clausulas || []).map((c) => ({
+        id: c.id,
+        titulo: c.titulo,
+        texto: c.texto ?? '',
+      })),
       economico: {
         valorTotal: Number(data.economico.valorTotal) || 0,
         pagoInicial: Number(data.economico.pagoInicial) || 0,

@@ -1,19 +1,61 @@
+import { useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
 import type { ContractFormReturn } from '../hooks/useContractForm'
 import { Card, Input, TextArea, Button } from '@/components/ui'
-import { calcularSaldo } from '../logic/calculations'
-import { formatCurrency } from '../lib/format'
 import { Trash2, Plus } from 'lucide-react'
+import { formatCurrencyInput, parseCurrencyInput } from '../lib/format'
 
 interface ContractFormProps {
   form: ContractFormReturn
 }
 
+function MonetaryInput({
+  label,
+  value,
+  onChange,
+}: {
+  label: string
+  value: number
+  onChange: (val: number) => void
+}) {
+  const display = value ? formatCurrencyInput(String(value)) : ''
+
+  const handleChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const raw = e.target.value.replace(/[^\d]/g, '')
+      onChange(parseCurrencyInput(raw))
+    },
+    [onChange],
+  )
+
+  return (
+    <Input
+      label={label}
+      type="text"
+      inputMode="numeric"
+      value={display}
+      onChange={handleChange}
+    />
+  )
+}
+
 export function ContractForm({ form }: ContractFormProps) {
-  const { register, control, empezarNueva, fields, append, remove } = form
+  const {
+    register,
+    control,
+    setValue,
+    empezarNueva,
+    especificacionesFields,
+    appendEspecificacion,
+    removeEspecificacion,
+    clausulasFields,
+    appendClausula,
+    removeClausula,
+  } = form
+
   const valorTotal = useWatch({ control, name: 'economico.valorTotal' })
   const pagoInicial = useWatch({ control, name: 'economico.pagoInicial' })
-  const saldo = calcularSaldo(Number(valorTotal) || 0, Number(pagoInicial) || 0)
+  const saldo = useWatch({ control, name: 'economico.saldo' })
 
   return (
     <section className="space-y-6">
@@ -61,13 +103,13 @@ export function ContractForm({ form }: ContractFormProps) {
             type="button"
             variant="ghost"
             size="sm"
-            onClick={() => append({ id: `esp-${Date.now()}`, nombre: '', valor: '' })}
+            onClick={() => appendEspecificacion({ id: `esp-${Date.now()}`, nombre: '', valor: '' })}
           >
             <Plus size={16} className="mr-1" /> Agregar
           </Button>
         </div>
         <div className="space-y-2">
-          {fields.map((field, index) => (
+          {especificacionesFields.map((field, index) => (
             <div key={field.id} className="flex items-start gap-2">
               <div className="flex-1">
                 <Input
@@ -83,7 +125,7 @@ export function ContractForm({ form }: ContractFormProps) {
               </div>
               <button
                 type="button"
-                onClick={() => remove(index)}
+                onClick={() => removeEspecificacion(index)}
                 className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors"
                 title="Eliminar"
               >
@@ -97,15 +139,61 @@ export function ContractForm({ form }: ContractFormProps) {
       <Card>
         <h2 className="text-lg font-bold text-brand-dark mb-4">Resumen Económico</h2>
         <div className="space-y-3">
-          <Input label="Valor total" type="number" {...register('economico.valorTotal', { valueAsNumber: true })} />
-          <Input label="Pago inicial" type="number" {...register('economico.pagoInicial', { valueAsNumber: true })} />
-          <div className="flex flex-col gap-1">
-            <label className="text-sm font-medium text-brand-dark">Saldo</label>
-            <div className="rounded-lg border border-brand-orange-light px-3 py-2 text-sm text-brand-dark bg-brand-light">
-              {formatCurrency(saldo)}
-            </div>
-          </div>
+          <MonetaryInput
+            label="Valor total"
+            value={valorTotal ?? 0}
+            onChange={(val) => setValue('economico.valorTotal', val)}
+          />
+          <MonetaryInput
+            label="Pago inicial"
+            value={pagoInicial ?? 0}
+            onChange={(val) => setValue('economico.pagoInicial', val)}
+          />
+          <MonetaryInput
+            label="Saldo"
+            value={saldo ?? 0}
+            onChange={(val) => setValue('economico.saldo', val)}
+          />
           <Input label="Fecha límite" type="date" {...register('economico.fechaLimite')} />
+        </div>
+      </Card>
+
+      <Card>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-brand-dark">Cláusulas</h2>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => appendClausula({ id: `cl-${Date.now()}`, titulo: '', texto: '' })}
+          >
+            <Plus size={16} className="mr-1" /> Agregar
+          </Button>
+        </div>
+        <div className="space-y-3">
+          {clausulasFields.map((field, index) => (
+            <div key={field.id} className="border border-brand-orange-light rounded-lg p-3">
+              <div className="flex items-start justify-between mb-2">
+                <Input
+                  placeholder="Título de la cláusula"
+                  className="font-bold text-sm w-full"
+                  {...register(`clausulas.${index}.titulo` as const)}
+                />
+                <button
+                  type="button"
+                  onClick={() => removeClausula(index)}
+                  className="ml-2 p-1 text-brand-gray hover:text-red-500 transition-colors shrink-0"
+                  title="Eliminar"
+                >
+                  <Trash2 size={18} />
+                </button>
+              </div>
+              <TextArea
+                placeholder="Contenido de la cláusula..."
+                {...register(`clausulas.${index}.texto` as const)}
+              />
+            </div>
+          ))}
         </div>
       </Card>
 

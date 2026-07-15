@@ -6,6 +6,12 @@ export const especificacionItemSchema = z.object({
   valor: z.string(),
 })
 
+export const clausulaItemSchema = z.object({
+  id: z.string(),
+  titulo: z.string().min(1, 'El título es obligatorio'),
+  texto: z.string(),
+})
+
 export const contratoSchema = z.object({
   numero: z.string(),
   fecha: z.string(),
@@ -26,6 +32,7 @@ export const contratoSchema = z.object({
     correo: z.string().optional().default(''),
   }),
   especificaciones: z.array(especificacionItemSchema),
+  clausulas: z.array(clausulaItemSchema),
   economico: z.object({
     valorTotal: z.coerce.number().nonnegative().default(65000000),
     pagoInicial: z.coerce.number().nonnegative().default(45000000),
