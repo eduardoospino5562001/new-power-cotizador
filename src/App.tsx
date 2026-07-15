@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header, Footer, PageContainer } from '@/components/layout'
 import { Button, Card } from '@/components/ui'
-import { FileText, Receipt, Calculator, Home } from 'lucide-react'
+import { FileText, Receipt, Calculator, Home, FileSignature } from 'lucide-react'
 
 import { useQuoteForm } from '@/features/quote/hooks/useQuoteForm'
 import { useGeneratePdf } from '@/features/quote/hooks/useGeneratePdf'
@@ -21,7 +21,15 @@ import type { InformeTecnico } from '@/features/report/types'
 
 import { Contabilidad } from '@/features/contabilidad/Contabilidad'
 
-type Modulo = 'home' | 'quote' | 'report' | 'contabilidad'
+import { useContractForm } from '@/features/contract/hooks/useContractForm'
+import { useGenerateContractPdf } from '@/features/contract/hooks/useGenerateContractPdf'
+import { ContractForm } from '@/features/contract/components/ContractForm'
+import { ContractPreview } from '@/features/contract/components/ContractPreview'
+import { cargarBorrador as cargarBorradorContract, borrarBorrador as borrarBorradorContract } from '@/features/contract/lib/storage'
+import type { ContratoFormData } from '@/features/contract/logic/validation'
+import type { ContratoCompraventa } from '@/features/contract/types'
+
+type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contract'
 
 function App() {
   const [modulo, setModulo] = useState<Modulo>('home')
@@ -34,6 +42,10 @@ function App() {
   const { generate: generateReport, generating: generatingReport, error: pdfErrorReport } = useGenerateReportPdf()
   const [draftReport, setDraftReport] = useState(false)
 
+  const contractForm = useContractForm()
+  const { generate: generateContract, generating: generatingContract, error: pdfErrorContract } = useGenerateContractPdf()
+  const [draftContract, setDraftContract] = useState(false)
+
   useEffect(() => {
     const q = cargarBorradorQuote<CotizacionFormData>()
     if (q && q.numero) setDraftQuote(true)
@@ -41,6 +53,9 @@ function App() {
     cargarBorradorReport<InformeFormData>().then((r) => {
       if (r && r.fecha) setDraftReport(true)
     })
+
+    const c = cargarBorradorContract<ContratoFormData>()
+    if (c && c.numero) setDraftContract(true)
   }, [])
 
   const irAHome = useCallback(() => setModulo('home'), [])
@@ -57,12 +72,40 @@ function App() {
     reportForm.empezarNueva()
   }
 
+  const descartarBorradorContract = () => {
+    borrarBorradorContract()
+    setDraftContract(false)
+    contractForm.empezarNueva()
+  }
+
   const handleGenerateQuotePdf = (cotizacion: Cotizacion) => {
     generateQuote(cotizacion)
   }
 
   const handleGenerateReportPdf = (informe: InformeTecnico) => {
     generateReport(informe)
+  }
+
+  const handleGenerateContractPdf = (data: ContratoFormData) => {
+    const contrato: ContratoCompraventa = {
+      numero: data.numero,
+      fecha: data.fecha,
+      vendedor: data.vendedor,
+      comprador: data.comprador,
+      equipo: {
+        ...data.equipo,
+        horas: Number(data.equipo.horas) || 0,
+        baterias: Number(data.equipo.baterias) || 0,
+      },
+      economico: {
+        valorTotal: Number(data.economico.valorTotal) || 0,
+        pagoInicial: Number(data.economico.pagoInicial) || 0,
+        saldo: Number(data.economico.saldo) || 0,
+        fechaLimite: data.economico.fechaLimite || '',
+      },
+      observaciones: data.observaciones || '',
+    }
+    generateContract(contrato)
   }
 
   if (modulo === 'home') {
@@ -102,6 +145,15 @@ function App() {
                   <p className="text-sm text-brand-gray">Genera comprobantes contables desde Excel</p>
                 </Card>
               </button>
+              <button onClick={() => setModulo('contract')} className="group">
+                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <FileSignature size={32} className="text-brand-orange-dark" />
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-dark mb-2">Contrato de compraventa</h3>
+                  <p className="text-sm text-brand-gray">Genera un contrato de compraventa con cláusulas y firmas</p>
+                </Card>
+              </button>
             </div>
           </div>
         </PageContainer>
@@ -136,6 +188,15 @@ function App() {
         </div>
       )}
 
+      {modulo === 'contract' && draftContract && (
+        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+            <p className="text-brand-dark">Borrador de contrato recuperado automáticamente.</p>
+            <Button variant="ghost" size="sm" onClick={descartarBorradorContract}>Descartar</Button>
+          </div>
+        </div>
+      )}
+
       {modulo === 'quote' && (
         <PageContainer>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -161,6 +222,17 @@ function App() {
       {modulo === 'contabilidad' && (
         <PageContainer>
           <Contabilidad />
+        </PageContainer>
+      )}
+
+      {modulo === 'contract' && (
+        <PageContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div><ContractForm form={contractForm} /></div>
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <ContractPreview control={contractForm.control} onGeneratePdf={handleGenerateContractPdf} generating={generatingContract} pdfError={pdfErrorContract} />
+            </div>
+          </div>
         </PageContainer>
       )}
 
