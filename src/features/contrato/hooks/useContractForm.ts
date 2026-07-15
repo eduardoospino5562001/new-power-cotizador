@@ -91,6 +91,7 @@ const DRAFT_DEBOUNCE_MS = 1500
 export function useContractForm() {
   const draftRestored = useRef(false)
   const draftTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const inicializado = useRef(false)
 
   const inicial = useCallback(() => {
     if (!draftRestored.current) {
@@ -109,7 +110,7 @@ export function useContractForm() {
     mode: 'onChange',
   })
 
-  const { watch, reset, setValue, control } = form
+  const { watch, reset, setValue, control, getValues } = form
 
   const espFieldArray = useFieldArray({
     control,
@@ -120,6 +121,26 @@ export function useContractForm() {
     control,
     name: 'clausulas',
   })
+
+  const appendClausulaRef = useRef(clausulasFieldArray.append)
+  appendClausulaRef.current = clausulasFieldArray.append
+  const appendEspRef = useRef(espFieldArray.append)
+  appendEspRef.current = espFieldArray.append
+
+  useEffect(() => {
+    if (inicializado.current) return
+    inicializado.current = true
+
+    const values = getValues()
+    if (!values.clausulas || values.clausulas.length === 0) {
+      const defaults = crearClausulasDefault()
+      defaults.forEach((c) => appendClausulaRef.current(c))
+    }
+    if (!values.especificaciones || values.especificaciones.length === 0) {
+      const defaults = crearEspecificacionesDefault()
+      defaults.forEach((e) => appendEspRef.current(e))
+    }
+  }, [getValues])
 
   useEffect(() => {
     const sub = watch((data, { name }) => {
