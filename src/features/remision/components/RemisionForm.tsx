@@ -1,7 +1,54 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
+import { useWatch } from 'react-hook-form'
 import type { RemisionFormReturn } from '../hooks/useRemisionForm'
+import type { Control } from 'react-hook-form'
+import type { RemisionFormData } from '../logic/validation'
 import { Card, Input, TextArea, Button } from '@/components/ui'
 import { Trash2, Plus } from 'lucide-react'
+
+function parseHora(val: string): { time: string; ampm: string } {
+  if (!val) return { time: '', ampm: 'AM' }
+  const parts = val.trim().split(' ')
+  return { time: parts[0] || '', ampm: parts[1] || 'AM' }
+}
+
+function HoraInput({
+  control,
+  name,
+}: {
+  control: Control<RemisionFormData>
+  name: 'entrega.hora' | 'recibe.hora'
+}) {
+  const raw = useWatch({ control, name }) ?? ''
+  const { time, ampm } = parseHora(raw)
+
+  const onChange = useCallback(
+    (newTime: string, newAmpm: string) => {
+      const setValue = (control as any).setValue
+      setValue(name, newTime ? `${newTime} ${newAmpm}` : '')
+    },
+    [control, name],
+  )
+
+  return (
+    <div className="flex gap-2">
+      <input
+        type="time"
+        value={time}
+        onChange={(e) => onChange(e.target.value, ampm)}
+        className="rounded-lg border border-brand-orange-light px-3 py-2 text-sm text-brand-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange flex-1"
+      />
+      <select
+        value={ampm}
+        onChange={(e) => onChange(time, e.target.value)}
+        className="rounded-lg border border-brand-orange-light px-2 py-2 text-sm text-brand-dark transition-colors focus:outline-none focus:ring-2 focus:ring-brand-orange"
+      >
+        <option value="AM">AM</option>
+        <option value="PM">PM</option>
+      </select>
+    </div>
+  )
+}
 
 interface RemisionFormProps {
   form: RemisionFormReturn
@@ -17,6 +64,7 @@ export function RemisionForm({ form }: RemisionFormProps) {
     detFields,
     appendDet,
     removeDet,
+    control,
   } = form
 
   const [selectedLogs, setSelectedLogs] = useState<Set<number>>(new Set())
@@ -146,7 +194,10 @@ export function RemisionForm({ form }: RemisionFormProps) {
               <Input label="Cargo" {...register('entrega.cargo')} />
               <Input label="Documento" {...register('entrega.documento')} />
               <Input label="Fecha" type="date" {...register('entrega.fecha')} />
-              <Input label="Hora" type="time" {...register('entrega.hora')} />
+              <div>
+                <label className="text-sm font-medium text-brand-dark mb-1 block">Hora</label>
+                <HoraInput control={control} name="entrega.hora" />
+              </div>
             </div>
           </div>
           <div>
@@ -156,7 +207,10 @@ export function RemisionForm({ form }: RemisionFormProps) {
               <Input label="Cargo" {...register('recibe.cargo')} />
               <Input label="Documento" {...register('recibe.documento')} />
               <Input label="Fecha" type="date" {...register('recibe.fecha')} />
-              <Input label="Hora" type="time" {...register('recibe.hora')} />
+              <div>
+                <label className="text-sm font-medium text-brand-dark mb-1 block">Hora</label>
+                <HoraInput control={control} name="recibe.hora" />
+              </div>
             </div>
           </div>
         </div>
