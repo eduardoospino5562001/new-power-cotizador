@@ -21,15 +21,15 @@ import type { InformeTecnico } from '@/features/report/types'
 
 import { Contabilidad } from '@/features/contabilidad/Contabilidad'
 
-import { useContractForm } from '@/features/contract/hooks/useContractForm'
-import { useGenerateContractPdf } from '@/features/contract/hooks/useGenerateContractPdf'
-import { ContractForm } from '@/features/contract/components/ContractForm'
-import { ContractPreview } from '@/features/contract/components/ContractPreview'
-import { cargarBorrador as cargarBorradorContract, borrarBorrador as borrarBorradorContract } from '@/features/contract/lib/storage'
-import type { ContratoFormData } from '@/features/contract/logic/validation'
-import type { ContratoCompraventa } from '@/features/contract/types'
+import { useContractForm } from '@/features/contrato/hooks/useContractForm'
+import { useGenerateContractPdf } from '@/features/contrato/hooks/useGenerateContractPdf'
+import { ContractForm } from '@/features/contrato/components/ContractForm'
+import { ContractPreview } from '@/features/contrato/components/ContractPreview'
+import { cargarBorrador as cargarBorradorContrato, borrarBorrador as borrarBorradorContrato } from '@/features/contrato/lib/storage'
+import type { ContratoFormData } from '@/features/contrato/logic/validation'
+import type { ContratoCompraventa } from '@/features/contrato/types'
 
-type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contract'
+type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contrato'
 
 function App() {
   const [modulo, setModulo] = useState<Modulo>('home')
@@ -42,9 +42,9 @@ function App() {
   const { generate: generateReport, generating: generatingReport, error: pdfErrorReport } = useGenerateReportPdf()
   const [draftReport, setDraftReport] = useState(false)
 
-  const contractForm = useContractForm()
-  const { generate: generateContract, generating: generatingContract, error: pdfErrorContract } = useGenerateContractPdf()
-  const [draftContract, setDraftContract] = useState(false)
+  const contratoForm = useContractForm()
+  const { generate: generateContrato, generating: generatingContrato, error: pdfErrorContrato } = useGenerateContractPdf()
+  const [draftContrato, setDraftContrato] = useState(false)
 
   useEffect(() => {
     const q = cargarBorradorQuote<CotizacionFormData>()
@@ -54,8 +54,8 @@ function App() {
       if (r && r.fecha) setDraftReport(true)
     })
 
-    const c = cargarBorradorContract<ContratoFormData>()
-    if (c && c.numero) setDraftContract(true)
+    const c = cargarBorradorContrato<ContratoFormData>()
+    if (c && c.numero) setDraftContrato(true)
   }, [])
 
   const irAHome = useCallback(() => setModulo('home'), [])
@@ -72,10 +72,10 @@ function App() {
     reportForm.empezarNueva()
   }
 
-  const descartarBorradorContract = () => {
-    borrarBorradorContract()
-    setDraftContract(false)
-    contractForm.empezarNueva()
+  const descartarBorradorContrato = () => {
+    borrarBorradorContrato()
+    setDraftContrato(false)
+    contratoForm.empezarNueva()
   }
 
   const handleGenerateQuotePdf = (cotizacion: Cotizacion) => {
@@ -86,17 +86,17 @@ function App() {
     generateReport(informe)
   }
 
-  const handleGenerateContractPdf = (data: ContratoFormData) => {
+  const handleGenerateContratoPdf = (data: ContratoFormData) => {
     const contrato: ContratoCompraventa = {
       numero: data.numero,
       fecha: data.fecha,
       vendedor: data.vendedor,
       comprador: data.comprador,
-      equipo: {
-        ...data.equipo,
-        horas: Number(data.equipo.horas) || 0,
-        baterias: Number(data.equipo.baterias) || 0,
-      },
+      especificaciones: (data.especificaciones || []).map((e) => ({
+        id: e.id,
+        nombre: e.nombre,
+        valor: e.valor ?? '',
+      })),
       economico: {
         valorTotal: Number(data.economico.valorTotal) || 0,
         pagoInicial: Number(data.economico.pagoInicial) || 0,
@@ -105,7 +105,7 @@ function App() {
       },
       observaciones: data.observaciones || '',
     }
-    generateContract(contrato)
+    generateContrato(contrato)
   }
 
   if (modulo === 'home') {
@@ -117,7 +117,7 @@ function App() {
             <h2 className="text-2xl font-bold text-brand-dark text-center">
               ¿Qué deseas crear?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 w-full max-w-4xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
               <button onClick={() => setModulo('quote')} className="group">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -145,7 +145,7 @@ function App() {
                   <p className="text-sm text-brand-gray">Genera comprobantes contables desde Excel</p>
                 </Card>
               </button>
-              <button onClick={() => setModulo('contract')} className="group">
+              <button onClick={() => setModulo('contrato')} className="group">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileSignature size={32} className="text-brand-orange-dark" />
@@ -188,11 +188,11 @@ function App() {
         </div>
       )}
 
-      {modulo === 'contract' && draftContract && (
+      {modulo === 'contrato' && draftContrato && (
         <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
           <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
             <p className="text-brand-dark">Borrador de contrato recuperado automáticamente.</p>
-            <Button variant="ghost" size="sm" onClick={descartarBorradorContract}>Descartar</Button>
+            <Button variant="ghost" size="sm" onClick={descartarBorradorContrato}>Descartar</Button>
           </div>
         </div>
       )}
@@ -225,12 +225,12 @@ function App() {
         </PageContainer>
       )}
 
-      {modulo === 'contract' && (
+      {modulo === 'contrato' && (
         <PageContainer>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div><ContractForm form={contractForm} /></div>
+            <div><ContractForm form={contratoForm} /></div>
             <div className="lg:sticky lg:top-6 lg:self-start">
-              <ContractPreview control={contractForm.control} onGeneratePdf={handleGenerateContractPdf} generating={generatingContract} pdfError={pdfErrorContract} />
+              <ContractPreview control={contratoForm.control} onGeneratePdf={handleGenerateContratoPdf} generating={generatingContrato} pdfError={pdfErrorContrato} />
             </div>
           </div>
         </PageContainer>

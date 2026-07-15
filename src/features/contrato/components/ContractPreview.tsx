@@ -38,6 +38,8 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
     Number(data.economico?.pagoInicial) || 0,
   )
 
+  const specs = data.especificaciones?.filter((s) => s?.nombre) ?? []
+
   return (
     <section className="space-y-6">
       <div className="rounded-xl bg-white border border-brand-orange-light p-6 shadow-sm">
@@ -82,18 +84,9 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
         <div className="mb-6">
           <h3 className="text-sm font-bold text-brand-dark mb-3 border-b border-brand-orange-light pb-1">ESPECIFICACIONES DEL EQUIPO</h3>
           <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-            <PreviewRow label="Marca" value={data.equipo?.marca} />
-            <PreviewRow label="Potencia" value={data.equipo?.potencia} />
-            <PreviewRow label="Modelo" value={data.equipo?.modelo} />
-            <PreviewRow label="Serial Motor" value={data.equipo?.serialMotor} />
-            <PreviewRow label="Serial Generador" value={data.equipo?.serialGenerador} />
-            <PreviewRow label="Horas" value={String(data.equipo?.horas ?? '')} />
-            <PreviewRow label="Voltaje" value={data.equipo?.voltaje} />
-            <PreviewRow label="Frecuencia" value={data.equipo?.frecuencia} />
-            <PreviewRow label="Radiador" value={data.equipo?.radiador ? 'Sí' : 'No'} />
-            <PreviewRow label="Breaker" value={data.equipo?.breaker ? 'Sí' : 'No'} />
-            <PreviewRow label="Módulo" value={data.equipo?.modulo ? 'Sí' : 'No'} />
-            <PreviewRow label="Baterías" value={String(data.equipo?.baterias ?? '')} />
+            {specs.map((s) => (
+              <PreviewRow key={s.id} label={s.nombre} value={s.valor} />
+            ))}
           </div>
         </div>
 
@@ -167,11 +160,11 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
 }
 
 function PreviewRow({ label, value }: { label: string; value?: string }) {
-  if (!value) return null
+  if (!value && value !== '0') return null
   return (
     <div className="flex justify-between">
       <span className="text-brand-gray">{label}:</span>
-      <span className="font-medium text-brand-dark">{value}</span>
+      <span className="font-medium text-brand-dark">{value || '—'}</span>
     </div>
   )
 }

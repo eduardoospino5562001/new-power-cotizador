@@ -3,13 +3,14 @@ import type { ContractFormReturn } from '../hooks/useContractForm'
 import { Card, Input, TextArea, Button } from '@/components/ui'
 import { calcularSaldo } from '../logic/calculations'
 import { formatCurrency } from '../lib/format'
+import { Trash2, Plus } from 'lucide-react'
 
 interface ContractFormProps {
   form: ContractFormReturn
 }
 
 export function ContractForm({ form }: ContractFormProps) {
-  const { register, control, empezarNueva } = form
+  const { register, control, empezarNueva, fields, append, remove } = form
   const valorTotal = useWatch({ control, name: 'economico.valorTotal' })
   const pagoInicial = useWatch({ control, name: 'economico.pagoInicial' })
   const saldo = calcularSaldo(Number(valorTotal) || 0, Number(pagoInicial) || 0)
@@ -54,29 +55,42 @@ export function ContractForm({ form }: ContractFormProps) {
       </Card>
 
       <Card>
-        <h2 className="text-lg font-bold text-brand-dark mb-4">Especificaciones del Equipo</h2>
-        <div className="space-y-3">
-          <Input label="Marca" {...register('equipo.marca')} />
-          <Input label="Potencia" {...register('equipo.potencia')} />
-          <Input label="Modelo" {...register('equipo.modelo')} placeholder="Modelo" />
-          <Input label="Serial Motor" {...register('equipo.serialMotor')} />
-          <Input label="Serial Generador" {...register('equipo.serialGenerador')} />
-          <Input label="Horas" type="number" {...register('equipo.horas', { valueAsNumber: true })} />
-          <Input label="Voltaje" {...register('equipo.voltaje')} />
-          <Input label="Frecuencia" {...register('equipo.frecuencia')} />
-          <label className="flex items-center gap-2 text-sm text-brand-dark">
-            <input type="checkbox" {...register('equipo.radiador')} className="accent-brand-orange" />
-            Radiador
-          </label>
-          <label className="flex items-center gap-2 text-sm text-brand-dark">
-            <input type="checkbox" {...register('equipo.breaker')} className="accent-brand-orange" />
-            Breaker
-          </label>
-          <label className="flex items-center gap-2 text-sm text-brand-dark">
-            <input type="checkbox" {...register('equipo.modulo')} className="accent-brand-orange" />
-            Módulo
-          </label>
-          <Input label="Baterías" type="number" {...register('equipo.baterias', { valueAsNumber: true })} />
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-brand-dark">Especificaciones del Equipo</h2>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => append({ id: `esp-${Date.now()}`, nombre: '', valor: '' })}
+          >
+            <Plus size={16} className="mr-1" /> Agregar
+          </Button>
+        </div>
+        <div className="space-y-2">
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex items-start gap-2">
+              <div className="flex-1">
+                <Input
+                  placeholder="Nombre"
+                  {...register(`especificaciones.${index}.nombre` as const)}
+                />
+              </div>
+              <div className="flex-[2]">
+                <Input
+                  placeholder="Valor"
+                  {...register(`especificaciones.${index}.valor` as const)}
+                />
+              </div>
+              <button
+                type="button"
+                onClick={() => remove(index)}
+                className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors"
+                title="Eliminar"
+              >
+                <Trash2 size={18} />
+              </button>
+            </div>
+          ))}
         </div>
       </Card>
 

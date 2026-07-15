@@ -1,5 +1,5 @@
-const STORAGE_KEY = 'npc-contract-borrador'
-const NUMERO_KEY = 'npc-contract-numero'
+const STORAGE_KEY = 'npc-contrato-borrador'
+const NUMERO_KEY = 'npc-contrato-numero'
 
 export function getSiguienteNumero(): string {
   const ultimo = getUltimoCorrelativo()

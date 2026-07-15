@@ -4,31 +4,31 @@ import { calcularSaldo } from '../logic/calculations'
 
 const styles = StyleSheet.create({
   page: { padding: 56, fontFamily: 'Inter', fontSize: 10, color: '#1c1917', lineHeight: 1.4 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24, borderBottomWidth: 2, borderBottomColor: '#f97316', paddingBottom: 16 },
-  headerLeft: { flexDirection: 'row', gap: 12, alignItems: 'center' },
-  headerRight: { alignItems: 'flex-end' },
-  logo: { width: 68, height: 68 },
-  empresaNombre: { fontSize: 14, fontWeight: 700 },
-  empresaDatos: { fontSize: 9, color: '#44403c', marginTop: 2 },
-  titulo: { fontSize: 18, fontWeight: 700, color: '#f97316', marginBottom: 6 },
-  seccion: { marginBottom: 20, padding: 12, backgroundColor: '#f5f5f4', borderRadius: 4 },
-  seccionLabel: { fontSize: 8, color: '#44403c', textTransform: 'uppercase', marginBottom: 4 },
-  seccionNombre: { fontSize: 12, fontWeight: 600 },
-  seccionText: { fontSize: 10, color: '#44403c', marginTop: 2 },
-  tablaTitulo: { fontSize: 11, fontWeight: 700, marginBottom: 8, color: '#f97316', textTransform: 'uppercase', marginTop: 12 },
-  tablaRow: { flexDirection: 'row', padding: '3 0', fontSize: 9, borderBottomWidth: 0.5, borderBottomColor: '#fed7aa' },
+  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, borderBottomWidth: 2, borderBottomColor: '#f97316', paddingBottom: 12 },
+  headerLeft: { flexDirection: 'row', gap: 10, alignItems: 'center', maxWidth: '60%' },
+  headerRight: { alignItems: 'flex-end', maxWidth: '40%' },
+  logo: { width: 56, height: 56 },
+  empresaNombre: { fontSize: 12, fontWeight: 700 },
+  empresaDatos: { fontSize: 8, color: '#44403c', marginTop: 1 },
+  titulo: { fontSize: 13, fontWeight: 700, color: '#f97316', marginBottom: 4 },
+  seccion: { marginBottom: 16, padding: 10, backgroundColor: '#f5f5f4', borderRadius: 4 },
+  seccionLabel: { fontSize: 8, color: '#44403c', textTransform: 'uppercase', marginBottom: 3 },
+  seccionNombre: { fontSize: 11, fontWeight: 600 },
+  seccionText: { fontSize: 9, color: '#44403c', marginTop: 1 },
+  tablaTitulo: { fontSize: 10, fontWeight: 700, marginBottom: 6, color: '#f97316', textTransform: 'uppercase', marginTop: 10 },
+  tablaRow: { flexDirection: 'row', padding: '2 0', fontSize: 9, borderBottomWidth: 0.5, borderBottomColor: '#fed7aa' },
   tablaLabel: { width: '40%', color: '#44403c' },
   tablaValue: { width: '60%', fontWeight: 600 },
   totalRow: { flexDirection: 'row', justifyContent: 'space-between', padding: '3 0', fontSize: 10 },
   totalRowBold: { flexDirection: 'row', justifyContent: 'space-between', padding: '6 0', fontSize: 12, fontWeight: 700, color: '#ea580c', borderTopWidth: 1.5, borderTopColor: '#1c1917', marginTop: 4 },
-  clausulaTitulo: { fontSize: 9, fontWeight: 700, marginTop: 8, color: '#1c1917' },
-  clausulaTexto: { fontSize: 8, color: '#44403c', marginTop: 2, lineHeight: 1.5 },
-  observaciones: { fontSize: 9, color: '#44403c', marginTop: 12, paddingTop: 8, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
-  firmaContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 32, paddingTop: 12, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
+  clausulaTitulo: { fontSize: 9, fontWeight: 700, marginTop: 6, color: '#1c1917' },
+  clausulaTexto: { fontSize: 8, color: '#44403c', marginTop: 1, lineHeight: 1.5 },
+  observaciones: { fontSize: 9, color: '#44403c', marginTop: 10, paddingTop: 6, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
+  firmaContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
   firmaColumna: { width: '45%' },
-  firmaTitulo: { fontSize: 9, fontWeight: 700, color: '#1c1917', marginBottom: 8, textTransform: 'uppercase' },
-  firmaLinea: { borderBottomWidth: 1, borderBottomColor: '#1c1917', height: 24, marginBottom: 2 },
-  firmaLabel: { fontSize: 8, color: '#44403c', marginBottom: 8 },
+  firmaTitulo: { fontSize: 9, fontWeight: 700, color: '#1c1917', marginBottom: 6, textTransform: 'uppercase' },
+  firmaLinea: { borderBottomWidth: 1, borderBottomColor: '#1c1917', height: 20, marginBottom: 2 },
+  firmaLabel: { fontSize: 8, color: '#44403c', marginBottom: 6 },
   footer: { position: 'absolute', bottom: 24, left: 56, right: 56, flexDirection: 'row', justifyContent: 'space-between', fontSize: 8, color: '#44403c', borderTopWidth: 0.5, borderTopColor: '#fed7aa', paddingTop: 8 },
 })
 
@@ -101,18 +101,12 @@ export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
 
         <View>
           <Text style={styles.tablaTitulo}>ESPECIFICACIONES DEL EQUIPO</Text>
-          <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Marca</Text><Text style={styles.tablaValue}>{contrato.equipo.marca}</Text></View>
-          <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Potencia</Text><Text style={styles.tablaValue}>{contrato.equipo.potencia}</Text></View>
-          {contrato.equipo.modelo && <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Modelo</Text><Text style={styles.tablaValue}>{contrato.equipo.modelo}</Text></View>}
-          {contrato.equipo.serialMotor && <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Serial Motor</Text><Text style={styles.tablaValue}>{contrato.equipo.serialMotor}</Text></View>}
-          {contrato.equipo.serialGenerador && <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Serial Generador</Text><Text style={styles.tablaValue}>{contrato.equipo.serialGenerador}</Text></View>}
-          {contrato.equipo.horas > 0 && <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Horas</Text><Text style={styles.tablaValue}>{String(contrato.equipo.horas)}</Text></View>}
-          {contrato.equipo.voltaje && <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Voltaje</Text><Text style={styles.tablaValue}>{contrato.equipo.voltaje}</Text></View>}
-          {contrato.equipo.frecuencia && <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Frecuencia</Text><Text style={styles.tablaValue}>{contrato.equipo.frecuencia}</Text></View>}
-          <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Radiador</Text><Text style={styles.tablaValue}>{contrato.equipo.radiador ? 'Sí' : 'No'}</Text></View>
-          <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Breaker</Text><Text style={styles.tablaValue}>{contrato.equipo.breaker ? 'Sí' : 'No'}</Text></View>
-          <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Módulo</Text><Text style={styles.tablaValue}>{contrato.equipo.modulo ? 'Sí' : 'No'}</Text></View>
-          <View style={styles.tablaRow}><Text style={styles.tablaLabel}>Baterías</Text><Text style={styles.tablaValue}>{String(contrato.equipo.baterias)}</Text></View>
+          {contrato.especificaciones.map((esp) => (
+            <View style={styles.tablaRow} key={esp.id}>
+              <Text style={styles.tablaLabel}>{esp.nombre}</Text>
+              <Text style={styles.tablaValue}>{esp.valor || '—'}</Text>
+            </View>
+          ))}
         </View>
 
         <View>

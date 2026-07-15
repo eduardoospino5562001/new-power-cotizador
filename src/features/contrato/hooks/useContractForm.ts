@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useFieldArray } from 'react-hook-form'
 import type { ContratoFormData } from '../logic/validation'
 import { getSiguienteNumero } from '../lib/storage'
 import { guardarBorrador, cargarBorrador, borrarBorrador } from '../lib/storage'
@@ -16,6 +16,29 @@ const vendedorDefaults = {
   correo: '',
 }
 
+let idCounter = 0
+function nextId() {
+  idCounter++
+  return `esp-${idCounter}`
+}
+
+function crearEspecificacionesDefault() {
+  return [
+    { id: nextId(), nombre: 'Marca', valor: 'Detroit' },
+    { id: nextId(), nombre: 'Potencia', valor: '500 KVA' },
+    { id: nextId(), nombre: 'Modelo', valor: '' },
+    { id: nextId(), nombre: 'Serial Motor', valor: '' },
+    { id: nextId(), nombre: 'Serial Generador', valor: '' },
+    { id: nextId(), nombre: 'Horas', valor: '0' },
+    { id: nextId(), nombre: 'Voltaje', valor: '' },
+    { id: nextId(), nombre: 'Frecuencia', valor: '' },
+    { id: nextId(), nombre: 'Radiador', valor: 'Sí' },
+    { id: nextId(), nombre: 'Breaker', valor: 'Sí' },
+    { id: nextId(), nombre: 'Módulo', valor: 'Sí' },
+    { id: nextId(), nombre: 'Baterías', valor: '2' },
+  ]
+}
+
 function crearValoresPorDefecto(): ContratoFormData {
   return {
     numero: getSiguienteNumero(),
@@ -29,20 +52,7 @@ function crearValoresPorDefecto(): ContratoFormData {
       telefono: '',
       correo: '',
     },
-    equipo: {
-      marca: 'Detroit',
-      potencia: '500 KVA',
-      modelo: '',
-      serialMotor: '',
-      serialGenerador: '',
-      horas: 0,
-      voltaje: '',
-      frecuencia: '',
-      radiador: true,
-      breaker: true,
-      modulo: true,
-      baterias: 2,
-    },
+    especificaciones: crearEspecificacionesDefault(),
     economico: {
       valorTotal: 65000000,
       pagoInicial: 45000000,
@@ -76,7 +86,12 @@ export function useContractForm() {
     mode: 'onChange',
   })
 
-  const { watch, reset, setValue } = form
+  const { watch, reset, setValue, control } = form
+
+  const fieldArray = useFieldArray({
+    control,
+    name: 'especificaciones',
+  })
 
   useEffect(() => {
     const sub = watch((data, { name }) => {
@@ -107,6 +122,10 @@ export function useContractForm() {
 
   return {
     ...form,
+    control,
+    fields: fieldArray.fields,
+    append: fieldArray.append,
+    remove: fieldArray.remove,
     empezarNueva,
   }
 }

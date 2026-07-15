@@ -1,5 +1,11 @@
 import { z } from 'zod/v3'
 
+export const especificacionItemSchema = z.object({
+  id: z.string(),
+  nombre: z.string().min(1, 'El nombre es obligatorio'),
+  valor: z.string(),
+})
+
 export const contratoSchema = z.object({
   numero: z.string(),
   fecha: z.string(),
@@ -19,20 +25,7 @@ export const contratoSchema = z.object({
     telefono: z.string().optional().default(''),
     correo: z.string().optional().default(''),
   }),
-  equipo: z.object({
-    marca: z.string(),
-    potencia: z.string(),
-    modelo: z.string(),
-    serialMotor: z.string(),
-    serialGenerador: z.string(),
-    horas: z.coerce.number().nonnegative().default(0),
-    voltaje: z.string(),
-    frecuencia: z.string(),
-    radiador: z.boolean().default(true),
-    breaker: z.boolean().default(true),
-    modulo: z.boolean().default(true),
-    baterias: z.coerce.number().nonnegative().default(2),
-  }),
+  especificaciones: z.array(especificacionItemSchema),
   economico: z.object({
     valorTotal: z.coerce.number().nonnegative().default(65000000),
     pagoInicial: z.coerce.number().nonnegative().default(45000000),

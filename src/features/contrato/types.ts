@@ -16,19 +16,10 @@ export interface Comprador {
   correo: string
 }
 
-export interface EspecificacionesEquipo {
-  marca: string
-  potencia: string
-  modelo: string
-  serialMotor: string
-  serialGenerador: string
-  horas: number
-  voltaje: string
-  frecuencia: string
-  radiador: boolean
-  breaker: boolean
-  modulo: boolean
-  baterias: number
+export interface EspecificacionItem {
+  id: string
+  nombre: string
+  valor: string
 }
 
 export interface ResumenEconomico {
@@ -43,7 +34,7 @@ export interface ContratoCompraventa {
   fecha: string
   vendedor: Vendedor
   comprador: Comprador
-  equipo: EspecificacionesEquipo
+  especificaciones: EspecificacionItem[]
   economico: ResumenEconomico
   observaciones: string
 }
