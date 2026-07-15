@@ -68,7 +68,7 @@ export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
           </View>
         </View>
 
-        <View style={styles.partesRow}>
+        <View style={styles.partesRow} wrap={false}>
           <View style={styles.parteCol}>
             <Text style={styles.seccionLabel}>VENDEDOR</Text>
             <Text style={styles.seccionNombre}>{contrato.vendedor.razonSocial}</Text>
@@ -113,7 +113,7 @@ export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
           {contrato.economico.fechaLimite ? <View style={styles.totalRow}><Text style={{ color: '#44403c' }}>Fecha límite</Text><Text style={{ fontWeight: 600 }}>{contrato.economico.fechaLimite}</Text></View> : null}
         </View>
 
-        <View>
+        <View wrap={false}>
           <Text style={styles.tablaTitulo}>CLÁUSULAS</Text>
           {contrato.clausulas.map((c) => (
             <View style={styles.clausulaItem} key={c.id} wrap={false}>
@@ -124,13 +124,13 @@ export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
         </View>
 
         {contrato.observaciones ? (
-          <View style={styles.observaciones}>
+          <View style={styles.observaciones} wrap={false}>
             <Text style={styles.obsTitulo}>OBSERVACIONES</Text>
             <Text style={{ fontSize: 10 }}>{contrato.observaciones}</Text>
           </View>
         ) : null}
 
-        <View style={styles.firmaContainer}>
+        <View style={styles.firmaContainer} wrap={false}>
           <View style={styles.firmaColumna}>
             <Text style={styles.firmaTitulo}>EL VENDEDOR</Text>
             <View style={styles.firmaLinea} />

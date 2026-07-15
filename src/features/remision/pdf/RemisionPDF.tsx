@@ -59,7 +59,7 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
           </View>
         </View>
 
-        <View style={styles.seccion}>
+        <View style={styles.seccion} wrap={false}>
           <Text style={styles.seccionLabel}>CLIENTE</Text>
           <Text style={styles.seccionNombre}>{remision.cliente.nombre}</Text>
           <Text style={styles.seccionText}>CC/NIT: {remision.cliente.ccNit}</Text>
@@ -68,7 +68,7 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
           {remision.cliente.telefono ? <Text style={styles.seccionText}>Teléfono: {remision.cliente.telefono}</Text> : null}
         </View>
 
-        <View style={styles.seccion}>
+        <View style={styles.seccion} wrap={false}>
           <Text style={styles.seccionLabel}>INFORMACIÓN LOGÍSTICA</Text>
           {remision.logistica.map((l) => (
             <Text key={l.id} style={styles.seccionText}>{l.nombre}: {l.valor || '—'}</Text>
@@ -96,13 +96,13 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
         </View>
 
         {remision.observaciones ? (
-          <View style={styles.observaciones}>
+          <View style={styles.observaciones} wrap={false}>
             <Text style={styles.obsTitulo}>OBSERVACIONES</Text>
             <Text style={{ fontSize: 10 }}>{remision.observaciones}</Text>
           </View>
         ) : null}
 
-        <View style={styles.firmaContainer}>
+        <View style={styles.firmaContainer} wrap={false}>
           <View style={styles.firmaColumna}>
             <Text style={styles.firmaTitulo}>ENTREGA</Text>
             <View style={styles.firmaLinea} />
