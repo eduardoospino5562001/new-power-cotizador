@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && sed -i \"s/__DEPLOY_VERSION__/$(git rev-parse --short HEAD)/\" dist/index.html",
     "lint": "oxlint",
     "preview": "vite preview",
     "test": "vitest run",
