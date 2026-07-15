@@ -2,30 +2,31 @@ import { Document, Page, View, Text, Image, StyleSheet } from '@react-pdf/render
 import type { Remision } from '../types'
 
 const styles = StyleSheet.create({
-  page: { padding: 56, fontFamily: 'Inter', fontSize: 10, color: '#1c1917', lineHeight: 1.4 },
-  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 20, borderBottomWidth: 2, borderBottomColor: '#f97316', paddingBottom: 12 },
-  headerLeft: { flexDirection: 'row', gap: 10, alignItems: 'center', maxWidth: '55%' },
+  page: { padding: 24, fontFamily: 'Inter', fontSize: 10, color: '#1c1917', lineHeight: 1.4 },
+  header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24, borderBottomWidth: 2, borderBottomColor: '#f97316', paddingBottom: 16 },
+  headerLeft: { flexDirection: 'row', gap: 12, alignItems: 'center', maxWidth: '55%' },
   headerRight: { alignItems: 'flex-end', maxWidth: '45%' },
-  logo: { width: 56, height: 56 },
-  empresaNombre: { fontSize: 12, fontWeight: 700 },
-  empresaDatos: { fontSize: 8, color: '#44403c', marginTop: 1 },
-  titulo: { fontSize: 14, fontWeight: 700, color: '#f97316', marginBottom: 4 },
-  seccion: { marginBottom: 16, padding: 10, backgroundColor: '#f5f5f4', borderRadius: 4 },
-  seccionLabel: { fontSize: 8, color: '#44403c', textTransform: 'uppercase', marginBottom: 3 },
-  seccionNombre: { fontSize: 11, fontWeight: 600 },
-  seccionText: { fontSize: 9, color: '#44403c', marginTop: 1 },
-  tablaTitulo: { fontSize: 10, fontWeight: 700, marginBottom: 6, color: '#f97316', textTransform: 'uppercase', marginTop: 10 },
-  tablaHeader: { flexDirection: 'row', backgroundColor: '#fed7aa', padding: '4 0', fontSize: 8, fontWeight: 700 },
+  logo: { width: 64, height: 64, borderRadius: 8 },
+  empresaNombre: { fontSize: 14, fontWeight: 700 },
+  empresaDatos: { fontSize: 10, color: '#44403c', marginTop: 2 },
+  titulo: { fontSize: 16, fontWeight: 700, color: '#f97316', marginBottom: 4 },
+  seccion: { marginBottom: 16, padding: 12, backgroundColor: '#f5f5f4', borderRadius: 8 },
+  seccionLabel: { fontSize: 10, color: '#44403c', textTransform: 'uppercase', marginBottom: 4, fontWeight: 700 },
+  seccionNombre: { fontSize: 14, fontWeight: 600 },
+  seccionText: { fontSize: 10, color: '#44403c', marginTop: 2 },
+  tablaTitulo: { fontSize: 12, fontWeight: 700, marginBottom: 8, color: '#f97316', textTransform: 'uppercase', marginTop: 16, borderBottomWidth: 1, borderBottomColor: '#fed7aa', paddingBottom: 4 },
+  tablaHeader: { flexDirection: 'row', backgroundColor: '#fed7aa', padding: '6 4', fontSize: 9, fontWeight: 700 },
   tablaHeaderCell: { padding: '0 4' },
-  tablaRow: { flexDirection: 'row', padding: '3 0', fontSize: 8, borderBottomWidth: 0.5, borderBottomColor: '#fed7aa' },
+  tablaRow: { flexDirection: 'row', padding: '4 0', fontSize: 9, borderBottomWidth: 0.5, borderBottomColor: '#fed7aa' },
   tablaCell: { padding: '0 4' },
-  observaciones: { fontSize: 9, color: '#44403c', marginTop: 10, paddingTop: 6, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
-  firmaContainer: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 24, paddingTop: 10, borderTopWidth: 0.5, borderTopColor: '#fed7aa' },
-  firmaColumna: { width: '48%' },
-  firmaTitulo: { fontSize: 9, fontWeight: 700, color: '#1c1917', marginBottom: 6, textTransform: 'uppercase' },
-  firmaLinea: { borderBottomWidth: 1, borderBottomColor: '#1c1917', height: 16, marginBottom: 2 },
-  firmaLabel: { fontSize: 8, color: '#44403c', marginBottom: 4 },
-  footer: { position: 'absolute', bottom: 24, left: 56, right: 56, flexDirection: 'row', justifyContent: 'space-between', fontSize: 8, color: '#44403c', borderTopWidth: 0.5, borderTopColor: '#fed7aa', paddingTop: 8 },
+  observaciones: { fontSize: 10, color: '#44403c', marginTop: 16, paddingTop: 8, borderTopWidth: 1, borderTopColor: '#fed7aa' },
+  obsTitulo: { fontSize: 12, fontWeight: 700, color: '#1c1917', marginBottom: 4 },
+  firmaContainer: { flexDirection: 'row', gap: 32, marginTop: 32, paddingTop: 16, borderTopWidth: 1, borderTopColor: '#fed7aa' },
+  firmaColumna: { flex: 1 },
+  firmaTitulo: { fontSize: 10, fontWeight: 700, color: '#1c1917', marginBottom: 8, textTransform: 'uppercase' },
+  firmaLinea: { borderBottomWidth: 1, borderBottomColor: '#1c1917', height: 20, marginBottom: 4 },
+  firmaLabel: { fontSize: 10, color: '#44403c', marginBottom: 2 },
+  footer: { position: 'absolute', bottom: 24, left: 24, right: 24, flexDirection: 'row', justifyContent: 'space-between', fontSize: 8, color: '#44403c', borderTopWidth: 0.5, borderTopColor: '#fed7aa', paddingTop: 8 },
 })
 
 interface RemisionPDFProps {
@@ -52,8 +53,8 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
               <Text style={styles.titulo}>REMISIÓN</Text>
               <Text style={styles.empresaDatos}>No. {remision.numero}</Text>
               <Text style={styles.empresaDatos}>Fecha: {remision.fecha}</Text>
-              {remision.pedido && <Text style={styles.empresaDatos}>Pedido: {remision.pedido}</Text>}
-              {remision.contrato && <Text style={styles.empresaDatos}>Contrato: {remision.contrato}</Text>}
+              {remision.pedido ? <Text style={styles.empresaDatos}>Pedido: {remision.pedido}</Text> : null}
+              {remision.contrato ? <Text style={styles.empresaDatos}>Contrato: {remision.contrato}</Text> : null}
             </View>
           </View>
         </View>
@@ -62,9 +63,9 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
           <Text style={styles.seccionLabel}>CLIENTE</Text>
           <Text style={styles.seccionNombre}>{remision.cliente.nombre}</Text>
           <Text style={styles.seccionText}>CC/NIT: {remision.cliente.ccNit}</Text>
-          {remision.cliente.direccion && <Text style={styles.seccionText}>Dirección: {remision.cliente.direccion}</Text>}
-          {remision.cliente.ciudad && <Text style={styles.seccionText}>Ciudad: {remision.cliente.ciudad}</Text>}
-          {remision.cliente.telefono && <Text style={styles.seccionText}>Teléfono: {remision.cliente.telefono}</Text>}
+          {remision.cliente.direccion ? <Text style={styles.seccionText}>Dirección: {remision.cliente.direccion}</Text> : null}
+          {remision.cliente.ciudad ? <Text style={styles.seccionText}>Ciudad: {remision.cliente.ciudad}</Text> : null}
+          {remision.cliente.telefono ? <Text style={styles.seccionText}>Teléfono: {remision.cliente.telefono}</Text> : null}
         </View>
 
         <View style={styles.seccion}>
@@ -74,7 +75,7 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
           ))}
         </View>
 
-        <View>
+        <View wrap={false}>
           <Text style={styles.tablaTitulo}>DETALLE DE ENTREGA</Text>
           <View style={styles.tablaHeader}>
             <Text style={[styles.tablaHeaderCell, { width: '8%' }]}>Cant.</Text>
@@ -94,17 +95,18 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
           ))}
         </View>
 
-        {remision.observaciones && (
+        {remision.observaciones ? (
           <View style={styles.observaciones}>
-            <Text style={{ fontSize: 10, fontWeight: 700, marginBottom: 4 }}>OBSERVACIONES</Text>
-            <Text style={{ fontSize: 9 }}>{remision.observaciones}</Text>
+            <Text style={styles.obsTitulo}>OBSERVACIONES</Text>
+            <Text style={{ fontSize: 10 }}>{remision.observaciones}</Text>
           </View>
-        )}
+        ) : null}
 
         <View style={styles.firmaContainer}>
           <View style={styles.firmaColumna}>
             <Text style={styles.firmaTitulo}>ENTREGA</Text>
-            <View style={styles.firmaLinea} /><Text style={styles.firmaLabel}>Firma</Text>
+            <View style={styles.firmaLinea} />
+            <Text style={styles.firmaLabel}>Firma</Text>
             <Text style={styles.seccionText}>Nombre: {remision.entrega.nombre || '—'}</Text>
             <Text style={styles.seccionText}>Cargo: {remision.entrega.cargo || '—'}</Text>
             <Text style={styles.seccionText}>Documento: {remision.entrega.documento || '—'}</Text>
@@ -113,7 +115,8 @@ export function RemisionPDF({ remision, logoSrc }: RemisionPDFProps) {
           </View>
           <View style={styles.firmaColumna}>
             <Text style={styles.firmaTitulo}>RECIBE</Text>
-            <View style={styles.firmaLinea} /><Text style={styles.firmaLabel}>Firma</Text>
+            <View style={styles.firmaLinea} />
+            <Text style={styles.firmaLabel}>Firma</Text>
             <Text style={styles.seccionText}>Nombre: {remision.recibe.nombre || '—'}</Text>
             <Text style={styles.seccionText}>Cargo: {remision.recibe.cargo || '—'}</Text>
             <Text style={styles.seccionText}>Documento: {remision.recibe.documento || '—'}</Text>
