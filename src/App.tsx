@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header, Footer, PageContainer } from '@/components/layout'
 import { Button, Card } from '@/components/ui'
-import { FileText, Receipt, Calculator, Home, FileSignature } from 'lucide-react'
+import { FileText, Receipt, Calculator, Home, FileSignature, Truck } from 'lucide-react'
 
 import { useQuoteForm } from '@/features/quote/hooks/useQuoteForm'
 import { useGeneratePdf } from '@/features/quote/hooks/useGeneratePdf'
@@ -29,7 +29,15 @@ import { cargarBorrador as cargarBorradorContrato, borrarBorrador as borrarBorra
 import type { ContratoFormData } from '@/features/contrato/logic/validation'
 import type { ContratoCompraventa } from '@/features/contrato/types'
 
-type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contrato'
+import { useRemisionForm } from '@/features/remision/hooks/useRemisionForm'
+import { useGenerateRemisionPdf } from '@/features/remision/hooks/useGenerateRemisionPdf'
+import { RemisionForm } from '@/features/remision/components/RemisionForm'
+import { RemisionPreview } from '@/features/remision/components/RemisionPreview'
+import { cargarBorrador as cargarBorradorRemision, borrarBorrador as borrarBorradorRemision } from '@/features/remision/lib/storage'
+import type { RemisionFormData } from '@/features/remision/logic/validation'
+import type { Remision } from '@/features/remision/types'
+
+type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contrato' | 'remision'
 
 function App() {
   const [modulo, setModulo] = useState<Modulo>('home')
@@ -46,6 +54,10 @@ function App() {
   const { generate: generateContrato, generating: generatingContrato, error: pdfErrorContrato } = useGenerateContractPdf()
   const [draftContrato, setDraftContrato] = useState(false)
 
+  const remisionForm = useRemisionForm()
+  const { generate: generateRemision, generating: generatingRemision, error: pdfErrorRemision } = useGenerateRemisionPdf()
+  const [draftRemision, setDraftRemision] = useState(false)
+
   useEffect(() => {
     const q = cargarBorradorQuote<CotizacionFormData>()
     if (q && q.numero) setDraftQuote(true)
@@ -56,6 +68,9 @@ function App() {
 
     const c = cargarBorradorContrato<ContratoFormData>()
     if (c && c.numero) setDraftContrato(true)
+
+    const r = cargarBorradorRemision<RemisionFormData>()
+    if (r && r.numero) setDraftRemision(true)
   }, [])
 
   const irAHome = useCallback(() => setModulo('home'), [])
@@ -76,6 +91,12 @@ function App() {
     borrarBorradorContrato()
     setDraftContrato(false)
     contratoForm.empezarNueva()
+  }
+
+  const descartarBorradorRemision = () => {
+    borrarBorradorRemision()
+    setDraftRemision(false)
+    remisionForm.empezarNueva()
   }
 
   const handleGenerateQuotePdf = (cotizacion: Cotizacion) => {
@@ -113,6 +134,55 @@ function App() {
     generateContrato(contrato)
   }
 
+  const handleGenerateRemisionPdf = (data: RemisionFormData) => {
+    const remision: Remision = {
+      numero: data.numero,
+      fecha: data.fecha,
+      pedido: data.pedido || '',
+      contrato: data.contrato || '',
+      cliente: {
+        nombre: data.cliente.nombre,
+        ccNit: data.cliente.ccNit,
+        direccion: data.cliente.direccion || '',
+        ciudad: data.cliente.ciudad || '',
+        telefono: data.cliente.telefono || '',
+      },
+      logistica: {
+        lugarDespacho: data.logistica.lugarDespacho || '',
+        lugarEntrega: data.logistica.lugarEntrega || '',
+        responsableTransporte: data.logistica.responsableTransporte || '',
+        vehiculo: data.logistica.vehiculo || '',
+        placa: data.logistica.placa || '',
+      },
+      detalles: (data.detalles || []).map((d) => ({
+        id: d.id,
+        cantidad: d.cantidad || '',
+        codigo: d.codigo || '',
+        descripcion: d.descripcion || '',
+        serial: d.serial || '',
+        observaciones: d.observaciones || '',
+      })),
+      observaciones: data.observaciones || '',
+      entrega: {
+        firma: '',
+        nombre: data.entrega?.nombre || '',
+        cargo: data.entrega?.cargo || '',
+        documento: data.entrega?.documento || '',
+        fecha: data.entrega?.fecha || '',
+        hora: data.entrega?.hora || '',
+      },
+      recibe: {
+        firma: '',
+        nombre: data.recibe?.nombre || '',
+        cargo: data.recibe?.cargo || '',
+        documento: data.recibe?.documento || '',
+        fecha: data.recibe?.fecha || '',
+        hora: data.recibe?.hora || '',
+      },
+    }
+    generateRemision(remision)
+  }
+
   if (modulo === 'home') {
     return (
       <>
@@ -122,7 +192,7 @@ function App() {
             <h2 className="text-2xl font-bold text-brand-dark text-center">
               ¿Qué deseas crear?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full max-w-6xl">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full max-w-6xl">
               <button onClick={() => setModulo('quote')} className="group">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
@@ -157,6 +227,15 @@ function App() {
                   </div>
                   <h3 className="text-lg font-bold text-brand-dark mb-2">Contrato de compraventa</h3>
                   <p className="text-sm text-brand-gray">Genera un contrato de compraventa con cláusulas y firmas</p>
+                </Card>
+              </button>
+              <button onClick={() => setModulo('remision')} className="group">
+                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
+                    <Truck size={32} className="text-brand-orange-dark" />
+                  </div>
+                  <h3 className="text-lg font-bold text-brand-dark mb-2">Remisión</h3>
+                  <p className="text-sm text-brand-gray">Genera una remisión con detalle de entrega y firmas</p>
                 </Card>
               </button>
             </div>
@@ -202,6 +281,15 @@ function App() {
         </div>
       )}
 
+      {modulo === 'remision' && draftRemision && (
+        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
+          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+            <p className="text-brand-dark">Borrador de remisión recuperado automáticamente.</p>
+            <Button variant="ghost" size="sm" onClick={descartarBorradorRemision}>Descartar</Button>
+          </div>
+        </div>
+      )}
+
       {modulo === 'quote' && (
         <PageContainer>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -236,6 +324,17 @@ function App() {
             <div><ContractForm form={contratoForm} /></div>
             <div className="lg:sticky lg:top-6 lg:self-start">
               <ContractPreview control={contratoForm.control} onGeneratePdf={handleGenerateContratoPdf} generating={generatingContrato} pdfError={pdfErrorContrato} />
+            </div>
+          </div>
+        </PageContainer>
+      )}
+
+      {modulo === 'remision' && (
+        <PageContainer>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div><RemisionForm form={remisionForm} /></div>
+            <div className="lg:sticky lg:top-6 lg:self-start">
+              <RemisionPreview control={remisionForm.control} onGeneratePdf={handleGenerateRemisionPdf} generating={generatingRemision} pdfError={pdfErrorRemision} />
             </div>
           </div>
         </PageContainer>
