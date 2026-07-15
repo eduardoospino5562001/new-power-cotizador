@@ -113,10 +113,14 @@ function App() {
       fecha: data.fecha,
       vendedor: data.vendedor,
       comprador: data.comprador,
-      especificaciones: (data.especificaciones || []).map((e) => ({
-        id: e.id,
-        nombre: e.nombre,
-        valor: e.valor ?? '',
+      grupos: (data.grupos || []).map((g) => ({
+        id: g.id,
+        nombre: g.nombre || '',
+        items: (g.items || []).map((e) => ({
+          id: e.id,
+          nombre: e.nombre,
+          valor: e.valor ?? '',
+        })),
       })),
       clausulas: (data.clausulas || []).map((c) => ({
         id: c.id,

@@ -22,6 +22,12 @@ export interface EspecificacionItem {
   valor: string
 }
 
+export interface GrupoEspecificacion {
+  id: string
+  nombre: string
+  items: EspecificacionItem[]
+}
+
 export interface ClausulaItem {
   id: string
   titulo: string
@@ -40,7 +46,7 @@ export interface ContratoCompraventa {
   fecha: string
   vendedor: Vendedor
   comprador: Comprador
-  especificaciones: EspecificacionItem[]
+  grupos: GrupoEspecificacion[]
   clausulas: ClausulaItem[]
   economico: ResumenEconomico
   observaciones: string

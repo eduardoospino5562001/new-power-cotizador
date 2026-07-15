@@ -45,9 +45,11 @@ export function ContractForm({ form }: ContractFormProps) {
     control,
     setValue,
     empezarNueva,
-    especificacionesFields,
-    appendEspecificacion,
-    removeEspecificacion,
+    gruposFields,
+    appendGrupo,
+    removeGrupo,
+    addItemToGrupo,
+    removeItemFromGrupo,
     clausulasFields,
     appendClausula,
     removeClausula,
@@ -120,45 +122,42 @@ export function ContractForm({ form }: ContractFormProps) {
         </div>
       </Card>
 
-      <Card>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-brand-dark">Especificaciones del Equipo</h2>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={() => appendEspecificacion({ id: `esp-${Date.now()}`, nombre: '', valor: '' })}
-          >
-            <Plus size={16} className="mr-1" /> Agregar
-          </Button>
-        </div>
-        <div className="space-y-2">
-          {especificacionesFields.map((field, index) => (
-            <div key={field.id} className="flex items-start gap-2">
-              <div className="flex-1">
-                <Input
-                  placeholder="Nombre"
-                  {...register(`especificaciones.${index}.nombre` as const)}
-                />
-              </div>
-              <div className="flex-[2]">
-                <Input
-                  placeholder="Valor"
-                  {...register(`especificaciones.${index}.valor` as const)}
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => removeEspecificacion(index)}
-                className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors"
-                title="Eliminar"
-              >
-                <Trash2 size={18} />
-              </button>
+      {gruposFields.map((g, gIdx) => (
+        <Card key={g.id}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2 flex-1">
+              <h2 className="text-lg font-bold text-brand-dark">Especificaciones</h2>
+              <Input className="w-48" placeholder="Nombre del equipo" {...register(`grupos.${gIdx}.nombre` as const)} />
             </div>
-          ))}
-        </div>
-      </Card>
+            <div className="flex items-center gap-2">
+              <Button type="button" variant="ghost" size="sm" onClick={() => addItemToGrupo(gIdx)}>
+                <Plus size={16} className="mr-1" /> Agregar
+              </Button>
+              {gruposFields.length > 1 && (
+                <button type="button" onClick={() => removeGrupo(gIdx)} className="p-1 text-brand-gray hover:text-red-500 transition-colors" title="Eliminar bloque">
+                  <Trash2 size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+          <div className="space-y-2">
+            {g.items?.map((_, iIdx) => (
+              <div key={`${g.id}-item-${iIdx}`} className="flex items-start gap-2">
+                <div className="flex-1">
+                  <Input placeholder="Nombre" {...register(`grupos.${gIdx}.items.${iIdx}.nombre` as const)} />
+                </div>
+                <div className="flex-[2]">
+                  <Input placeholder="Valor" {...register(`grupos.${gIdx}.items.${iIdx}.valor` as const)} />
+                </div>
+                <button type="button" onClick={() => removeItemFromGrupo(gIdx, iIdx)} className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors" title="Eliminar"><Trash2 size={18} /></button>
+              </div>
+            ))}
+          </div>
+        </Card>
+      ))}
+      <Button type="button" variant="ghost" size="sm" onClick={() => appendGrupo({ id: `grp-${Date.now()}`, nombre: `Equipo ${gruposFields.length + 1}`, items: [] })} className="w-full">
+        <Plus size={16} className="mr-2" /> Agregar otro equipo
+      </Button>
 
       <Card>
         <h2 className="text-lg font-bold text-brand-dark mb-4">Resumen Económico</h2>

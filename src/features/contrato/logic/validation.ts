@@ -12,6 +12,12 @@ export const clausulaItemSchema = z.object({
   texto: z.string(),
 })
 
+export const grupoEspecificacionSchema = z.object({
+  id: z.string(),
+  nombre: z.string(),
+  items: z.array(especificacionItemSchema),
+})
+
 export const contratoSchema = z.object({
   numero: z.string(),
   fecha: z.string(),
@@ -31,7 +37,7 @@ export const contratoSchema = z.object({
     telefono: z.string().optional().default(''),
     correo: z.string().optional().default(''),
   }),
-  especificaciones: z.array(especificacionItemSchema),
+  grupos: z.array(grupoEspecificacionSchema),
   clausulas: z.array(clausulaItemSchema),
   economico: z.object({
     valorTotal: z.coerce.number().nonnegative().default(65000000),

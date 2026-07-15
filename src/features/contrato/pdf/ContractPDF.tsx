@@ -4,12 +4,12 @@ import type { ContratoCompraventa } from '../types'
 const styles = StyleSheet.create({
   page: { padding: 24, fontFamily: 'Inter', fontSize: 10, color: '#1c1917', lineHeight: 1.4 },
   header: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 24, borderBottomWidth: 2, borderBottomColor: '#f97316', paddingBottom: 16 },
-  headerLeft: { flexDirection: 'row', gap: 12, alignItems: 'center', maxWidth: '60%' },
-  headerRight: { alignItems: 'flex-end', maxWidth: '40%' },
+  headerLeft: { flexDirection: 'row', gap: 12, alignItems: 'center', maxWidth: '50%' },
+  headerRight: { alignItems: 'flex-end', maxWidth: '50%' },
   logo: { width: 64, height: 64, borderRadius: 8 },
   empresaNombre: { fontSize: 14, fontWeight: 700, color: '#1c1917' },
   empresaDatos: { fontSize: 10, color: '#44403c', marginTop: 2 },
-  titulo: { fontSize: 16, fontWeight: 700, color: '#f97316', marginBottom: 4 },
+  titulo: { fontSize: 13, fontWeight: 700, color: '#f97316' },
   partesRow: { flexDirection: 'row', gap: 16, marginBottom: 24 },
   parteCol: { flex: 1, backgroundColor: '#f5f5f4', borderRadius: 8, padding: 12 },
   seccionLabel: { fontSize: 10, color: '#44403c', textTransform: 'uppercase', marginBottom: 4, fontWeight: 700 },
@@ -89,19 +89,21 @@ export function ContractPDF({ contrato, logoSrc }: ContractPDFProps) {
           </View>
         </View>
 
-        <View wrap={false}>
-          <Text style={styles.tablaTitulo}>ESPECIFICACIONES DEL EQUIPO</Text>
-          <View style={styles.specsGrid}>
-            {contrato.especificaciones.map((esp) => (
-              <View style={styles.specsCol} key={esp.id}>
-                <View style={styles.specsRow}>
-                  <Text style={styles.specsLabel}>{esp.nombre}</Text>
-                  <Text style={styles.specsValue}>{esp.valor || '—'}</Text>
+        {contrato.grupos.map((g) => (
+          <View key={g.id} wrap={false}>
+            <Text style={styles.tablaTitulo}>{g.nombre || 'ESPECIFICACIONES DEL EQUIPO'}</Text>
+            <View style={styles.specsGrid}>
+              {g.items.map((esp) => (
+                <View style={styles.specsCol} key={esp.id}>
+                  <View style={styles.specsRow}>
+                    <Text style={styles.specsLabel}>{esp.nombre}</Text>
+                    <Text style={styles.specsValue}>{esp.valor || '—'}</Text>
+                  </View>
                 </View>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
-        </View>
+        ))}
 
         <View wrap={false}>
           <Text style={styles.tablaTitulo}>RESUMEN ECONÓMICO</Text>

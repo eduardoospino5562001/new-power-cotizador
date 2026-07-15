@@ -18,7 +18,7 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
   if (!data) return null
 
   const saldo = Number(data.economico?.saldo) || 0
-  const specs = data.especificaciones?.filter((s) => s?.nombre) ?? []
+  const grupos = data.grupos?.filter((g) => g?.items?.length) ?? []
   const clausulas = data.clausulas?.filter((c) => c?.titulo) ?? []
 
   return (
@@ -62,14 +62,16 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
           </div>
         </div>
 
-        <div className="mb-6">
-          <h3 className="text-sm font-bold text-brand-dark mb-3 border-b border-brand-orange-light pb-1">ESPECIFICACIONES DEL EQUIPO</h3>
-          <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
-            {specs.map((s) => (
-              <PreviewRow key={s.id} label={s.nombre} value={s.valor} />
-            ))}
+        {grupos.map((g) => (
+          <div key={g.id} className="mb-6">
+            <h3 className="text-sm font-bold text-brand-dark mb-3 border-b border-brand-orange-light pb-1">{g.nombre || 'ESPECIFICACIONES'}</h3>
+            <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+              {g.items?.filter((s) => s?.nombre).map((s) => (
+                <PreviewRow key={s.id} label={s.nombre} value={s.valor} />
+              ))}
+            </div>
           </div>
-        </div>
+        ))}
 
         <div className="mb-6">
           <h3 className="text-sm font-bold text-brand-dark mb-3 border-b border-brand-orange-light pb-1">RESUMEN ECONÓMICO</h3>

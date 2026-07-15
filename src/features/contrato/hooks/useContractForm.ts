@@ -17,17 +17,13 @@ const vendedorDefaults = {
 }
 
 let espCounter = 0
+let grupoCounter = 0
 let clausulaCounter = 0
-function nextEspId() {
-  espCounter++
-  return `esp-${espCounter}`
-}
-function nextClausulaId() {
-  clausulaCounter++
-  return `cl-${clausulaCounter}`
-}
+function nextEspId() { espCounter++; return `esp-${espCounter}` }
+function nextGrupoId() { grupoCounter++; return `grp-${grupoCounter}` }
+function nextClausulaId() { clausulaCounter++; return `cl-${clausulaCounter}` }
 
-function crearEspecificacionesDefault() {
+function crearItemsDefault() {
   return [
     { id: nextEspId(), nombre: 'Marca', valor: 'Detroit' },
     { id: nextEspId(), nombre: 'Potencia', valor: '500 KVA' },
@@ -74,7 +70,7 @@ function crearValoresPorDefecto(): ContratoFormData {
       telefono: '',
       correo: '',
     },
-    especificaciones: crearEspecificacionesDefault(),
+    grupos: [{ id: nextGrupoId(), nombre: 'Equipo 1', items: crearItemsDefault() }],
     clausulas: crearClausulasDefault(),
     economico: {
       valorTotal: 65000000,
@@ -112,35 +108,40 @@ export function useContractForm() {
 
   const { watch, reset, setValue, control, getValues } = form
 
-  const espFieldArray = useFieldArray({
-    control,
-    name: 'especificaciones',
-  })
+  const gruposFieldArray = useFieldArray({ control, name: 'grupos' })
+  const clausulasFieldArray = useFieldArray({ control, name: 'clausulas' })
 
-  const clausulasFieldArray = useFieldArray({
-    control,
-    name: 'clausulas',
-  })
-
+  const appendGrupoRef = useRef(gruposFieldArray.append)
+  appendGrupoRef.current = gruposFieldArray.append
   const appendClausulaRef = useRef(clausulasFieldArray.append)
   appendClausulaRef.current = clausulasFieldArray.append
-  const appendEspRef = useRef(espFieldArray.append)
-  appendEspRef.current = espFieldArray.append
 
   useEffect(() => {
     if (inicializado.current) return
     inicializado.current = true
-
     const values = getValues()
     if (!values.clausulas || values.clausulas.length === 0) {
-      const defaults = crearClausulasDefault()
-      defaults.forEach((c) => appendClausulaRef.current(c))
+      crearClausulasDefault().forEach((c) => appendClausulaRef.current(c))
     }
-    if (!values.especificaciones || values.especificaciones.length === 0) {
-      const defaults = crearEspecificacionesDefault()
-      defaults.forEach((e) => appendEspRef.current(e))
+    if (!values.grupos || values.grupos.length === 0) {
+      appendGrupoRef.current({ id: nextGrupoId(), nombre: 'Equipo 1', items: crearItemsDefault() })
     }
   }, [getValues])
+
+  const addItemToGrupo = useCallback((grupoIndex: number) => {
+    const grupos = getValues('grupos') || []
+    const items = grupos[grupoIndex]?.items || []
+    setValue(`grupos.${grupoIndex}.items`, [
+      ...items,
+      { id: `esp-${Date.now()}`, nombre: '', valor: '' },
+    ])
+  }, [getValues, setValue])
+
+  const removeItemFromGrupo = useCallback((grupoIndex: number, itemIndex: number) => {
+    const grupos = getValues('grupos') || []
+    const items = grupos[grupoIndex]?.items || []
+    setValue(`grupos.${grupoIndex}.items`, items.filter((_, i) => i !== itemIndex))
+  }, [getValues, setValue])
 
   useEffect(() => {
     const sub = watch((data, { name }) => {
@@ -172,9 +173,11 @@ export function useContractForm() {
   return {
     ...form,
     control,
-    especificacionesFields: espFieldArray.fields,
-    appendEspecificacion: espFieldArray.append,
-    removeEspecificacion: espFieldArray.remove,
+    gruposFields: gruposFieldArray.fields,
+    appendGrupo: gruposFieldArray.append,
+    removeGrupo: gruposFieldArray.remove,
+    addItemToGrupo,
+    removeItemFromGrupo,
     clausulasFields: clausulasFieldArray.fields,
     appendClausula: clausulasFieldArray.append,
     removeClausula: clausulasFieldArray.remove,
