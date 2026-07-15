@@ -190,8 +190,8 @@ function App() {
             <h2 className="text-2xl font-bold text-brand-dark text-center">
               ¿Qué deseas crear?
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full max-w-6xl">
-              <button onClick={() => setModulo('quote')} className="group">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full max-w-6xl min-w-0">
+              <button onClick={() => setModulo('quote')} className="group w-full">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Receipt size={32} className="text-brand-orange-dark" />
@@ -200,7 +200,7 @@ function App() {
                   <p className="text-sm text-brand-gray">Genera una cotización profesional con ítems, impuestos y totales</p>
                 </Card>
               </button>
-              <button onClick={() => setModulo('report')} className="group">
+              <button onClick={() => setModulo('report')} className="group w-full">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileText size={32} className="text-brand-orange-dark" />
@@ -209,7 +209,7 @@ function App() {
                   <p className="text-sm text-brand-gray">Crea un informe técnico con registro fotográfico y observaciones</p>
                 </Card>
               </button>
-              <button onClick={() => setModulo('contabilidad')} className="group">
+              <button onClick={() => setModulo('contabilidad')} className="group w-full">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Calculator size={32} className="text-brand-orange-dark" />
@@ -218,7 +218,7 @@ function App() {
                   <p className="text-sm text-brand-gray">Genera comprobantes contables desde Excel</p>
                 </Card>
               </button>
-              <button onClick={() => setModulo('contrato')} className="group">
+              <button onClick={() => setModulo('contrato')} className="group w-full">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
                     <FileSignature size={32} className="text-brand-orange-dark" />
@@ -227,7 +227,7 @@ function App() {
                   <p className="text-sm text-brand-gray">Genera un contrato de compraventa con cláusulas y firmas</p>
                 </Card>
               </button>
-              <button onClick={() => setModulo('remision')} className="group">
+              <button onClick={() => setModulo('remision')} className="group w-full">
                 <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer">
                   <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Truck size={32} className="text-brand-orange-dark" />
