@@ -21,6 +21,7 @@ export interface AccountMap {
   CTA_KATHE: number
   BANCOLOMBIA: number
   DAVIVIENDA: number
+  CAJA: number
 }
 
 export interface ScanResult {

@@ -34,6 +34,7 @@ export function useComprobantesForm() {
     CTA_KATHE: ACCOUNT_CODE_OPTIONS.BANCOLOMBIA,
     BANCOLOMBIA: ACCOUNT_CODE_OPTIONS.BANCOLOMBIA,
     DAVIVIENDA: ACCOUNT_CODE_OPTIONS.DAVIVIENDA,
+    CAJA: ACCOUNT_CODE_OPTIONS.CAJA,
   })
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)

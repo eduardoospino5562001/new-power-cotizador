@@ -56,6 +56,7 @@ export function ComprobantesPreview({ form }: ComprobantesPreviewProps) {
               <p><span className="text-brand-gray">CTA Kathe:</span> {accountMap.CTA_KATHE}</p>
               <p><span className="text-brand-gray">Bancolombia:</span> {accountMap.BANCOLOMBIA}</p>
               <p><span className="text-brand-gray">Davivienda:</span> {accountMap.DAVIVIENDA}</p>
+              <p><span className="text-brand-gray">Caja:</span> {accountMap.CAJA}</p>
             </div>
           </div>
         </div>

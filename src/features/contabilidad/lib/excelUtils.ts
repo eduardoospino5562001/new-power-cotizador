@@ -4,6 +4,7 @@ export const ACCOUNT_CODE_OPTIONS: Record<string, number> = {
   EFECTIVO: 11050501,
   BANCOLOMBIA: 11100504,
   DAVIVIENDA: 11100505,
+  CAJA: 11050501,
 }
 
 export const SOURCE_MEDIUM_KEYS: [string, string][] = [
@@ -13,6 +14,7 @@ export const SOURCE_MEDIUM_KEYS: [string, string][] = [
   ['BONIFICACION', 'BONIFICACION'],
   ['CTA ARQ', 'CTA ARQ'],
   ['CTA KATHE', 'CTA KATHE'],
+  ['CAJA', 'CAJA'],
 ]
 
 export const ACCOUNT = {

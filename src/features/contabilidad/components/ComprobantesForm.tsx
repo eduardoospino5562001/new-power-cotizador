@@ -147,6 +147,12 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
                 value={Object.entries(ACCOUNT_CODE_OPTIONS).find(([, v]) => v === accountMap.DAVIVIENDA)?.[0] ?? 'DAVIVIENDA'}
                 onChange={(e) => updateAccount('DAVIVIENDA', e.target.value)}
               />
+              <Select
+                label="Cuenta Caja"
+                options={ACCOUNT_OPTIONS}
+                value={Object.entries(ACCOUNT_CODE_OPTIONS).find(([, v]) => v === accountMap.CAJA)?.[0] ?? 'CAJA'}
+                onChange={(e) => updateAccount('CAJA', e.target.value)}
+              />
             </div>
           </Card>
         </>
