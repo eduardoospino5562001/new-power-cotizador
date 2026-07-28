@@ -49,12 +49,12 @@ export async function exportWorkbook(
   }
 
   const requiredRows = rows.length * 2 + 1
-  const mainRange = XLSX.utils.decode_range(mainWs['!ref'] ?? 'A1:W1')
+  const mainRange = XLSX.utils.decode_range(mainWs['!ref'] ?? 'A1:AA1')
   const helperRange = XLSX.utils.decode_range(helperWs['!ref'] ?? 'A1:C1')
 
   const currentMainEnd = mainRange.e.r + 1
   if (currentMainEnd < requiredRows) {
-    const newRange = XLSX.utils.decode_range(`A1:W${requiredRows}`)
+    const newRange = XLSX.utils.decode_range(`A1:AA${requiredRows}`)
     mainWs['!ref'] = XLSX.utils.encode_range(newRange)
   }
 
@@ -119,7 +119,7 @@ export async function exportWorkbook(
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(debitAccount),
       G: makeCell(thirdId ?? ''),
-      V: makeCellWithFormat(amount, '0'),
+      V: makeCellWithFormat(amount, '#,##0'),
     }
     for (const [col, cell] of Object.entries(debitCells)) {
       const ref = `${col}${debitRow + 1}`
@@ -138,7 +138,7 @@ export async function exportWorkbook(
       O: makeCell(installment ?? ''),
       P: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       T: makeCell(description),
-      W: makeCellWithFormat(amount, '0'),
+      W: makeCellWithFormat(amount, '#,##0'),
     }
     for (const [col, cell] of Object.entries(creditCells)) {
       const ref = `${col}${creditRow + 1}`
@@ -151,36 +151,10 @@ export async function exportWorkbook(
     helperWs[`C${helperRef}`] = makeCell(debitAccount)
   }
 
-  mainWs['!cols'] = [
-    { wch: 8 },   // A - Tipo comprobante
-    { wch: 14 },  // B - Consecutivo
-    { wch: 13 },  // C - Fecha
-    { wch: 6 },   // D - Moneda
-    { wch: 10 },  // E - Tasa cambio
-    { wch: 14 },  // F - Código cuenta
-    { wch: 16 },  // G - Tercero
-    { wch: 10 },  // H - Sucursal
-    { wch: 12 },  // I - Código producto
-    { wch: 10 },  // J - Código bodega
-    { wch: 8 },   // K - Acción
-    { wch: 12 },  // L - Cantidad
-    { wch: 8 },   // M - Prefijo
-    { wch: 14 },  // N - Recibo consecutivo
-    { wch: 8 },   // O - Número cuota
-    { wch: 13 },  // P - Fecha vencimiento
-    { wch: 10 },  // Q - Código impuesto
-    { wch: 12 },  // R - Código grupo activo
-    { wch: 14 },  // S - Código activo fijo
-    { wch: 8 },   // T - Descripción
-    { wch: 14 },  // U - Centro costos
-    { wch: 18 },  // V - Débito
-    { wch: 18 },  // W - Crédito
-  ]
-
   delete mainWs['!comments']
   delete helperWs['!comments']
 
-  const range = XLSX.utils.decode_range(`A1:W${requiredRows}`)
+  const range = XLSX.utils.decode_range(`A1:AA${requiredRows}`)
   if (!mainWs['!ref']) mainWs['!ref'] = XLSX.utils.encode_range(range)
 
   const output = XLSX.write(templateWb, { type: 'array', bookType: 'xlsx', cellDates: true, cellStyles: true })
