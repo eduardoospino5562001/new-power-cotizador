@@ -1,4 +1,4 @@
-name = "new-power-cotizador-v4"
+name = "new-power-cotizador-v2"
 main = "src/worker.ts"
 compatibility_date = "2026-07-04"
 compatibility_flags = ["nodejs_compat"]
