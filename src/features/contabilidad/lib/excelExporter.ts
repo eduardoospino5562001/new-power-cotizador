@@ -77,8 +77,13 @@ export async function exportWorkbook(
     }
   }
 
+  function dateToExcelSerial(date: Date): number {
+    const utcDays = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000
+    return utcDays + 25569
+  }
+
   const makeCell = (value: unknown): XLSX.CellObject => {
-    if (value instanceof Date) return { t: 'd', v: value }
+    if (value instanceof Date) return { t: 'n', v: dateToExcelSerial(value) }
     if (value === null || value === undefined) return { t: 's', v: '' }
     if (typeof value === 'number') return { t: 'n', v: value }
     return { t: 's', v: String(value) }
