@@ -86,6 +86,14 @@ export function useComprobantesForm() {
         accountMap
       )
 
+      const lastConsecutive = startConsecutive + r.rows.length - 1
+      if (String(lastConsecutive).length > 11) {
+        throw new Error(
+          `El consecutivo final ${lastConsecutive} supera el limite de 11 caracteres. ` +
+          `Reduce el valor de "Consecutivo inicio" (actual: ${startConsecutive}).`
+        )
+      }
+
       const filename = `comprobante_${selectedProject}_${selectedYear}_${String(selectedMonth).padStart(2, '0')}.xlsx`
 
       const outputRows: OutputRow[] = []

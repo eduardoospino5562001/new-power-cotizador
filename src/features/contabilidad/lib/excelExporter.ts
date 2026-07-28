@@ -114,7 +114,7 @@ export async function exportWorkbook(
 
     const debitCells: Record<string, XLSX.CellObject> = {
       A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(consecutive),
+      B: makeCell(String(consecutive)),
       C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(debitAccount),
@@ -128,7 +128,7 @@ export async function exportWorkbook(
 
     const creditCells: Record<string, XLSX.CellObject> = {
       A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(consecutive),
+      B: makeCell(String(consecutive)),
       C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(ACCOUNT.CREDIT_FUND),
