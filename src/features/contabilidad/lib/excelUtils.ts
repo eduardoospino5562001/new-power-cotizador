@@ -19,7 +19,7 @@ export const SOURCE_MEDIUM_KEYS: [string, string][] = [
 
 export const ACCOUNT = {
   DEBIT_DEFAULT: 556,
-  CREDIT_FUND: '28050501\xa0',
+  CREDIT_FUND: '28050501',
   CURRENCY_CODE: 'COP',
   DOC_TYPE: 'RCBO',
 }

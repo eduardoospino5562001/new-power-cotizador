@@ -114,7 +114,7 @@ export async function exportWorkbook(
 
     const debitCells: Record<string, XLSX.CellObject> = {
       A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(String(consecutive)),
+      B: makeCell(String(consecutive).padStart(11, '0')),
       C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(debitAccount),
@@ -128,7 +128,7 @@ export async function exportWorkbook(
 
     const creditCells: Record<string, XLSX.CellObject> = {
       A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(String(consecutive)),
+      B: makeCell(String(consecutive).padStart(11, '0')),
       C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(ACCOUNT.CREDIT_FUND),
@@ -151,13 +151,39 @@ export async function exportWorkbook(
     helperWs[`C${helperRef}`] = makeCell(debitAccount)
   }
 
+  mainWs['!cols'] = [
+    { wch: 8 },   // A - Tipo comprobante
+    { wch: 14 },  // B - Consecutivo
+    { wch: 13 },  // C - Fecha
+    { wch: 6 },   // D - Moneda
+    { wch: 10 },  // E - Tasa cambio
+    { wch: 14 },  // F - Código cuenta
+    { wch: 16 },  // G - Tercero
+    { wch: 10 },  // H - Sucursal
+    { wch: 12 },  // I - Código producto
+    { wch: 10 },  // J - Código bodega
+    { wch: 8 },   // K - Acción
+    { wch: 12 },  // L - Cantidad
+    { wch: 8 },   // M - Prefijo
+    { wch: 14 },  // N - Recibo consecutivo
+    { wch: 8 },   // O - Número cuota
+    { wch: 13 },  // P - Fecha vencimiento
+    { wch: 10 },  // Q - Código impuesto
+    { wch: 12 },  // R - Código grupo activo
+    { wch: 14 },  // S - Código activo fijo
+    { wch: 8 },   // T - Descripción
+    { wch: 14 },  // U - Centro costos
+    { wch: 18 },  // V - Débito
+    { wch: 18 },  // W - Crédito
+  ]
+
   delete mainWs['!comments']
   delete helperWs['!comments']
 
   const range = XLSX.utils.decode_range(`A1:W${requiredRows}`)
   if (!mainWs['!ref']) mainWs['!ref'] = XLSX.utils.encode_range(range)
 
-  const output = XLSX.write(templateWb, { type: 'array', bookType: 'xlsx', cellDates: true })
+  const output = XLSX.write(templateWb, { type: 'array', bookType: 'xlsx', cellDates: true, cellStyles: true })
 
   return { output: output as ArrayBuffer, skippedMissingAmount, rows }
 }
