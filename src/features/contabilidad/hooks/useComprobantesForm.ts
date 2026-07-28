@@ -89,7 +89,7 @@ export function useComprobantesForm() {
       const lastConsecutive = startConsecutive + r.rows.length - 1
       if (String(lastConsecutive).length > 11) {
         throw new Error(
-          `El consecutivo final ${lastConsecutive} supera el limite de 11 caracteres. ` +
+          `El consecutivo final ${lastConsecutive} supera el limite de 11 digitos. ` +
           `Reduce el valor de "Consecutivo inicio" (actual: ${startConsecutive}).`
         )
       }

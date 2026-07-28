@@ -65,7 +65,7 @@ export async function exportWorkbook(
   }
 
   for (let r = 1; r < requiredRows; r++) {
-    for (let c = 0; c < 23; c++) {
+    for (let c = 0; c < 27; c++) {
       const ref = XLSX.utils.encode_cell({ r, c })
       delete mainWs[ref]
     }
@@ -95,6 +95,15 @@ export async function exportWorkbook(
     return cell
   }
 
+  const makeNumeric = (value: string | null | undefined): XLSX.CellObject => {
+    if (value === null || value === undefined) return { t: 's', v: '' }
+    const trimmed = value.trim()
+    if (trimmed === '') return { t: 's', v: '' }
+    const num = Number(trimmed)
+    if (!isNaN(num)) return { t: 'n', v: num }
+    return { t: 's', v: trimmed }
+  }
+
   for (let idx = 0; idx < rows.length; idx++) {
     const src = rows[idx]
     const consecutive = startConsecutive + idx
@@ -114,12 +123,12 @@ export async function exportWorkbook(
 
     const debitCells: Record<string, XLSX.CellObject> = {
       A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(String(consecutive).padStart(11, '0')),
+      B: makeCell(consecutive),
       C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(debitAccount),
-      G: makeCell(thirdId ?? ''),
-      V: makeCellWithFormat(amount, '#,##0'),
+      G: makeNumeric(thirdId),
+      V: makeCellWithFormat(amount, '0'),
     }
     for (const [col, cell] of Object.entries(debitCells)) {
       const ref = `${col}${debitRow + 1}`
@@ -128,17 +137,17 @@ export async function exportWorkbook(
 
     const creditCells: Record<string, XLSX.CellObject> = {
       A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(String(consecutive).padStart(11, '0')),
+      B: makeCell(consecutive),
       C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       D: makeCell(ACCOUNT.CURRENCY_CODE),
       F: makeCell(ACCOUNT.CREDIT_FUND),
-      G: makeCell(thirdId ?? ''),
+      G: makeNumeric(thirdId),
       M: makeCell(ACCOUNT.DOC_TYPE),
-      N: makeCell(receipt ?? ''),
+      N: makeNumeric(receipt),
       O: makeCell(installment ?? ''),
       P: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
       T: makeCell(description),
-      W: makeCellWithFormat(amount, '#,##0'),
+      W: makeCellWithFormat(amount, '0'),
     }
     for (const [col, cell] of Object.entries(creditCells)) {
       const ref = `${col}${creditRow + 1}`
