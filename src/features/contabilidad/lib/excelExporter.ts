@@ -1,10 +1,11 @@
 import * as XLSX from 'xlsx'
+import ExcelJS from 'exceljs'
 import type { AccountMap, SourceRow } from '../types'
 import { ACCOUNT, debitAccountForMedium } from './excelUtils'
 import { collectSourceRows } from './excelReader'
 
 export async function exportWorkbook(
-  templateFile: File,
+  _templateFile: File,
   sourceFile: File,
   startConsecutive: number,
   selectedProject: string,
@@ -12,14 +13,9 @@ export async function exportWorkbook(
   month: number,
   accountMap: AccountMap
 ): Promise<{ output: ArrayBuffer; skippedMissingAmount: number; rows: SourceRow[] }> {
-  const [templateBuf, sourceBuf] = await Promise.all([
-    templateFile.arrayBuffer(),
-    sourceFile.arrayBuffer(),
-  ])
+  const sourceBuf = await sourceFile.arrayBuffer()
 
-  const templateWb = XLSX.read(templateBuf, { type: 'array', cellDates: true, cellStyles: true })
   const sourceWb = XLSX.read(sourceBuf, { type: 'array', cellDates: true })
-
   const sourceWs = sourceWb.Sheets[sourceWb.SheetNames[0]]
   const sourceRef = sourceWs['!ref']
   if (!sourceRef) throw new Error('El archivo origen no tiene datos.')
@@ -31,142 +27,119 @@ export async function exportWorkbook(
     throw new Error(`El proyecto '${selectedProject}' no tiene filas con monto para exportar en ese mes.`)
   }
 
-  const mainWsName = 'Datos'
-  const helperWsName = 'Hoja1'
+  const wb = new ExcelJS.Workbook()
+  const ws = wb.addWorksheet('Datos')
 
-  let mainWs = templateWb.Sheets[mainWsName]
-  let helperWs = templateWb.Sheets[helperWsName]
-
-  if (!mainWs) {
-    mainWs = XLSX.utils.aoa_to_sheet([[]])
-    templateWb.SheetNames.push(mainWsName)
-    templateWb.Sheets[mainWsName] = mainWs
+  const COL_WIDTHS: Record<string, number> = {
+    A: 13.14, B: 13.57, C: 11.43, D: 8.71, E: 14.57, F: 17,
+    G: 14.14, H: 11.43, I: 11.43, J: 11.86, K: 9.71, L: 9,
+    M: 11.86, N: 13.29, O: 12.43, P: 12.14, Q: 13.86, R: 11.43,
+    S: 25.57, T: 14.43, U: 23.29, V: 17.86, W: 20.43, X: 17.14,
+    Y: 17.86, Z: 17.14,
   }
-  if (!helperWs) {
-    helperWs = XLSX.utils.aoa_to_sheet([[]])
-    templateWb.SheetNames.push(helperWsName)
-    templateWb.Sheets[helperWsName] = helperWs
+  for (const [col, w] of Object.entries(COL_WIDTHS)) {
+    const idx = col.charCodeAt(0) - 65
+    ws.getColumn(idx + 1).width = w
   }
 
-  const requiredRows = rows.length * 2 + 1
-  const mainRange = XLSX.utils.decode_range(mainWs['!ref'] ?? 'A1:AA1')
-  const helperRange = XLSX.utils.decode_range(helperWs['!ref'] ?? 'A1:C1')
+  const REQUIRED_COLS = new Set(['A', 'B', 'C', 'F', 'G'])
 
-  const currentMainEnd = mainRange.e.r + 1
-  if (currentMainEnd < requiredRows) {
-    const newRange = XLSX.utils.decode_range(`A1:AA${requiredRows}`)
-    mainWs['!ref'] = XLSX.utils.encode_range(newRange)
+  const HEADERS: Record<string, string> = {
+    A: 'Tipo de comprobante', B: 'Consecutivo comprobante', C: 'Fecha de elaboración',
+    D: 'Sigla moneda', E: 'Tasa de cambio', F: 'Código cuenta contable',
+    G: 'Identificación tercero', H: 'Sucursal', I: 'Código producto',
+    J: 'Código de bodega', K: 'Acción', L: 'Cantidad producto',
+    M: 'Prefijo', N: 'Consecutivo', O: 'No. cuota', P: 'Fecha vencimiento',
+    Q: 'Código impuesto', R: 'Código grupo activo fijo', S: 'Código activo fijo',
+    T: 'Descripción', U: 'Código centro/subcentro de costos',
+    V: 'Débito', W: 'Crédito', X: 'Observaciones',
+    Y: 'Base gravable libro compras/ventas', Z: 'Base exenta libro compras/ventas',
+    AA: 'Mes de cierre',
   }
 
-  const currentHelperEnd = helperRange.e.r + 1
-  if (currentHelperEnd < rows.length) {
-    const newHelperRange = XLSX.utils.decode_range(`A1:C${rows.length}`)
-    helperWs['!ref'] = XLSX.utils.encode_range(newHelperRange)
-  }
-
-  for (let r = 1; r < requiredRows; r++) {
-    for (let c = 0; c < 27; c++) {
-      const ref = XLSX.utils.encode_cell({ r, c })
-      delete mainWs[ref]
+  const headerRow = ws.getRow(1)
+  headerRow.height = 30
+  for (let c = 0; c < 27; c++) {
+    const colLetter = String.fromCharCode(65 + c)
+    const cell = headerRow.getCell(c + 1)
+    cell.value = HEADERS[colLetter] ?? ''
+    cell.fill = {
+      type: 'pattern', pattern: 'solid',
+      fgColor: { argb: REQUIRED_COLS.has(colLetter) ? 'FFFF0000' : 'FF0070C0' },
+    }
+    cell.font = { color: { argb: 'FFFFFFFF' }, bold: false }
+    cell.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+    cell.border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' },
     }
   }
-  for (let r = 0; r < rows.length; r++) {
-    for (let c = 0; c < 3; c++) {
-      const ref = XLSX.utils.encode_cell({ r, c })
-      delete helperWs[ref]
-    }
-  }
 
-  function dateToExcelSerial(date: Date): number {
-    const utcDays = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()) / 86400000
-    return utcDays + 25569
-  }
-
-  const makeCell = (value: unknown): XLSX.CellObject => {
-    if (value instanceof Date) return { t: 'n', v: dateToExcelSerial(value) }
-    if (value === null || value === undefined) return { t: 's', v: '' }
-    if (typeof value === 'number') return { t: 'n', v: value }
-    return { t: 's', v: String(value) }
-  }
-
-  const makeCellWithFormat = (value: unknown, numberFormat: string): XLSX.CellObject => {
-    const cell = makeCell(value)
-    cell.z = numberFormat
-    return cell
-  }
-
-  const makeNumeric = (value: string | null | undefined): XLSX.CellObject => {
-    if (value === null || value === undefined) return { t: 's', v: '' }
-    const trimmed = value.trim()
-    if (trimmed === '') return { t: 's', v: '' }
-    const num = Number(trimmed)
-    if (!isNaN(num)) return { t: 'n', v: num }
-    return { t: 's', v: trimmed }
+  function col(letter: string): number {
+    if (letter.length === 1) return letter.charCodeAt(0) - 64
+    return (letter.charCodeAt(0) - 64) * 26 + (letter.charCodeAt(1) - 64)
   }
 
   for (let idx = 0; idx < rows.length; idx++) {
     const src = rows[idx]
     const consecutive = startConsecutive + idx
-    const debitRow = 1 + idx * 2
-    const creditRow = 2 + idx * 2
+    const debitRowNum = 2 + idx * 2
+    const creditRowNum = 3 + idx * 2
 
     const amount = src.amount
     const dateValue = src.date
-    const lot = src.lot
-    const label = src.label
-    const description = label ? `${label}-${lot}` : lot
-    const installment = src.installment
+    const description = src.label ? `${src.label}-${src.lot}` : src.lot
     const thirdId = src.thirdId
-    const receipt = src.receipt
-
     const debitAccount = debitAccountForMedium(src.medium, accountMap)
 
-    const debitCells: Record<string, XLSX.CellObject> = {
-      A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(consecutive),
-      C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
-      D: makeCell(ACCOUNT.CURRENCY_CODE),
-      F: makeCell(debitAccount),
-      G: makeNumeric(thirdId),
-      V: makeCellWithFormat(amount, '0'),
-    }
-    for (const [col, cell] of Object.entries(debitCells)) {
-      const ref = `${col}${debitRow + 1}`
-      mainWs[ref] = cell
-    }
+    const dRow = ws.getRow(debitRowNum)
+    dRow.getCell(col('A')).value = ACCOUNT.DEBIT_DEFAULT
+    dRow.getCell(col('B')).value = consecutive
+    dRow.getCell(col('C')).value = dateValue
+    dRow.getCell(col('C')).numFmt = 'DD/MM/YYYY'
+    dRow.getCell(col('D')).value = ACCOUNT.CURRENCY_CODE
+    dRow.getCell(col('F')).value = debitAccount
+    dRow.getCell(col('G')).value = thirdId ? Number(thirdId) : ''
+    dRow.getCell(col('V')).value = amount
+    dRow.getCell(col('V')).numFmt = '0'
 
-    const creditCells: Record<string, XLSX.CellObject> = {
-      A: makeCell(ACCOUNT.DEBIT_DEFAULT),
-      B: makeCell(consecutive),
-      C: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
-      D: makeCell(ACCOUNT.CURRENCY_CODE),
-      F: makeCell(ACCOUNT.CREDIT_FUND),
-      G: makeNumeric(thirdId),
-      M: makeCell(ACCOUNT.DOC_TYPE),
-      N: makeNumeric(receipt),
-      O: makeCell(installment ?? ''),
-      P: makeCellWithFormat(dateValue, 'DD/MM/YYYY'),
-      T: makeCell(description),
-      W: makeCellWithFormat(amount, '0'),
-    }
-    for (const [col, cell] of Object.entries(creditCells)) {
-      const ref = `${col}${creditRow + 1}`
-      mainWs[ref] = cell
-    }
+    const cRow = ws.getRow(creditRowNum)
+    cRow.getCell(col('A')).value = ACCOUNT.DEBIT_DEFAULT
+    cRow.getCell(col('B')).value = consecutive
+    cRow.getCell(col('C')).value = dateValue
+    cRow.getCell(col('C')).numFmt = 'DD/MM/YYYY'
+    cRow.getCell(col('D')).value = ACCOUNT.CURRENCY_CODE
+    cRow.getCell(col('F')).value = ACCOUNT.CREDIT_FUND
+    cRow.getCell(col('G')).value = thirdId ? Number(thirdId) : ''
+    cRow.getCell(col('M')).value = ACCOUNT.DOC_TYPE
+    cRow.getCell(col('N')).value = src.receipt ? Number(src.receipt) : ''
+    cRow.getCell(col('O')).value = src.installment ?? ''
+    cRow.getCell(col('P')).value = dateValue
+    cRow.getCell(col('P')).numFmt = 'DD/MM/YYYY'
+    cRow.getCell(col('T')).value = description
+    cRow.getCell(col('W')).value = amount
+    cRow.getCell(col('W')).numFmt = '0'
 
-    const helperRef = idx + 1
-    helperWs[`A${helperRef}`] = makeCell(null)
-    helperWs[`B${helperRef}`] = makeCell(debitAccount)
-    helperWs[`C${helperRef}`] = makeCell(debitAccount)
+    cRow.getCell(col('O')).alignment = { horizontal: 'left', wrapText: true }
+    cRow.getCell(col('O')).border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' },
+    }
+    cRow.getCell(col('P')).border = {
+      top: { style: 'thin' }, left: { style: 'thin' },
+      bottom: { style: 'thin' }, right: { style: 'thin' },
+    }
   }
 
-  delete mainWs['!comments']
-  delete helperWs['!comments']
+  const helperSheet = wb.addWorksheet('Hoja1')
+  for (let idx = 0; idx < rows.length; idx++) {
+    const debitAccount = debitAccountForMedium(rows[idx].medium, accountMap)
+    const r = helperSheet.getRow(idx + 1)
+    r.getCell(1).value = ''
+    r.getCell(2).value = debitAccount
+    r.getCell(3).value = debitAccount
+  }
 
-  const range = XLSX.utils.decode_range(`A1:AA${requiredRows}`)
-  if (!mainWs['!ref']) mainWs['!ref'] = XLSX.utils.encode_range(range)
-
-  const output = XLSX.write(templateWb, { type: 'array', bookType: 'xlsx', cellDates: true, cellStyles: true })
-
-  return { output: output as ArrayBuffer, skippedMissingAmount, rows }
+  const outBuf = await wb.xlsx.writeBuffer()
+  return { output: outBuf as ArrayBuffer, skippedMissingAmount, rows }
 }
