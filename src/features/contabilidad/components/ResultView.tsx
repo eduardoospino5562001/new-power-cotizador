@@ -69,8 +69,8 @@ export function ResultView({ result, onDownload }: ResultViewProps) {
           </p>
         </div>
 
-        <div className="flex items-center justify-between mb-3 text-sm">
-          <div className="flex items-center gap-2">
+        <div className="mb-3 flex flex-col gap-3 text-sm sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
             <Button variant="ghost" size="sm" disabled={page === 0} onClick={() => setPage(Math.max(0, page - 1))}>
               <ChevronLeft size={16} />
             </Button>
@@ -81,7 +81,7 @@ export function ResultView({ result, onDownload }: ResultViewProps) {
               <ChevronRight size={16} />
             </Button>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between gap-2 sm:justify-start">
             <Button variant="ghost" size="sm" disabled={colPage === 0} onClick={() => setColPage(colPage - 1)}>
               <ChevronLeft size={16} />
             </Button>
@@ -125,7 +125,7 @@ export function ResultView({ result, onDownload }: ResultViewProps) {
           </table>
         </div>
 
-        <div className="flex items-center justify-between mt-3 text-xs text-brand-gray">
+        <div className="mt-3 flex flex-col gap-3 text-xs text-brand-gray sm:flex-row sm:items-center sm:justify-between">
           <span>Mostrando {paginatedRows.length} de {result.outputRows.length} líneas</span>
           <div className="flex gap-1">
             {COL_PAGES.map((_, idx) => (

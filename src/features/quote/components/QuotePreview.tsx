@@ -3,7 +3,7 @@ import { useWatch } from 'react-hook-form'
 import type { CotizacionFormData } from '../logic/validation'
 import { calcularTotales } from '../logic/calculations'
 import { TotalsSummary } from './TotalsSummary'
-import { Card, Button } from '@/components/ui'
+import { Card, Button, DocumentWatermark } from '@/components/ui'
 import { formatCurrency, formatDate, calcularVencimiento } from '../lib/formatCurrency'
 import type { Cotizacion } from '../types'
 import { Loader2 } from 'lucide-react'
@@ -97,7 +97,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
   }
 
   return (
-    <Card className="border-2 border-brand-orange shadow-md">
+    <Card className="relative isolate overflow-hidden border-2 border-brand-orange shadow-md">
       <div className="text-center mb-4">
         <h2 className="text-xl font-bold text-brand-dark tracking-tight">COTIZACIÓN</h2>
         <p className="text-sm text-brand-gray">No. {numero}</p>
@@ -200,6 +200,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
           <p className="text-xs text-red-500 mt-2 text-center">{pdfError}</p>
         )}
       </div>
+      <DocumentWatermark />
     </Card>
   )
 }

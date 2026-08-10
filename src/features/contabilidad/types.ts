@@ -4,8 +4,8 @@ export interface SourceRow {
   medium: string
   amount: number
   label: string
-  receipt: string | null
-  thirdId: string | null
+  receipt: number
+  thirdId: string | number | null
   installment: number | null
 }
 
@@ -37,14 +37,14 @@ export interface OutputRow {
   siglaMoneda: string
   tasaCambio: null
   codigoCuenta: number | string
-  identificacionTercero: string | null
+  identificacionTercero: string | number | null
   sucursal: null
   codigoProducto: null
   codigoBodega: null
   accion: null
   cantidadProducto: null
   prefijo: string | null
-  reciboConsecutivo: string | null
+  reciboConsecutivo: number | null
   numeroCuota: number | null
   fechaVencimiento: Date | null
   codigoImpuesto: null

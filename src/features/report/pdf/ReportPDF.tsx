@@ -7,6 +7,7 @@ const styles = StyleSheet.create({
   headerLeft: { flexDirection: 'row', gap: 12, alignItems: 'center' },
   headerRight: { alignItems: 'flex-end' },
   logo: { width: 68, height: 68 },
+  watermark: { position: 'absolute', top: 246, left: 156, width: 300, height: 300, opacity: 0.055 },
   empresaNombre: { fontSize: 14, fontWeight: 700 },
   empresaDatos: { fontSize: 9, color: '#44403c', marginTop: 2 },
   titulo: { fontSize: 18, fontWeight: 700, color: '#f97316', marginBottom: 6 },
@@ -36,6 +37,7 @@ export function ReportPDF({ informe, logoSrc }: ReportPDFProps) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page}>
+        {logoSrc && <Image fixed style={styles.watermark} src={logoSrc} />}
         <View fixed>
           <View style={styles.header}>
             <View style={styles.headerLeft}>

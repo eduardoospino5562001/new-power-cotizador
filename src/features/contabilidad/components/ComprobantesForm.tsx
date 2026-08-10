@@ -81,8 +81,8 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
                   {projectInfo.total} filas, {projectInfo.missingAmount} sin monto
                 </p>
               )}
-              <div className="flex gap-2">
-                <div className="flex-1">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="min-w-0">
                   <Select
                     label="Año"
                     options={years.map((y) => ({ value: String(y), label: String(y) }))}
@@ -90,7 +90,7 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
                     onChange={(e) => setSelectedYear(Number(e.target.value))}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="min-w-0">
                   <Select
                     label="Mes"
                     options={months.map((m) => ({ value: String(m), label: String(m).padStart(2, '0') }))}
@@ -150,7 +150,7 @@ export function ComprobantesForm({ form }: ComprobantesFormProps) {
               <Select
                 label="Cuenta Caja"
                 options={ACCOUNT_OPTIONS}
-                value={Object.entries(ACCOUNT_CODE_OPTIONS).find(([, v]) => v === accountMap.CAJA)?.[0] ?? 'CAJA'}
+                value={Object.entries(ACCOUNT_CODE_OPTIONS).find(([, v]) => v === accountMap.CAJA)?.[0] ?? 'EFECTIVO'}
                 onChange={(e) => updateAccount('CAJA', e.target.value)}
               />
             </div>

@@ -30,6 +30,14 @@ const styles = StyleSheet.create({
     width: 68,
     height: 68,
   },
+  watermark: {
+    position: 'absolute',
+    top: 246,
+    left: 156,
+    width: 300,
+    height: 300,
+    opacity: 0.055,
+  },
   empresaNombre: {
     fontSize: 14,
     fontWeight: 700,
@@ -175,6 +183,7 @@ export function QuotePDF({ cotizacion, logoSrc }: QuotePDFProps) {
   return (
     <Document>
       <Page size="LETTER" style={styles.page} wrap>
+        {logoSrc && <Image fixed style={styles.watermark} src={logoSrc} />}
         <View fixed>
           <View style={styles.header}>
             <View style={styles.headerLeft}>

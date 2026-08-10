@@ -11,6 +11,7 @@ Modulos actuales:
 - `contrato`: contratos de compraventa con clausulas y PDF.
 - `remision`: remisiones de entrega y PDF.
 - `contabilidad`: conversion de archivos Excel a comprobantes contables y descarga de Excel.
+- `history`: biblioteca local de archivos generados y documentos retomables.
 
 ## Stack y comandos
 
@@ -35,8 +36,10 @@ Antes de modificar codigo, revisa `git status --short`. El repositorio puede con
 - `src/main.tsx` registra las fuentes PDF y monta React en `#root` con `StrictMode`.
 - `src/App.tsx` es el orquestador y la navegacion. No existe React Router.
 - El tipo `Modulo` y el estado `modulo` en `App.tsx` seleccionan la vista actual.
-- La pantalla inicial contiene las tarjetas de los cinco modulos.
-- Cotizacion, informe, contrato y remision usan el patron formulario a la izquierda + vista previa sticky a la derecha en escritorio.
+- La pantalla inicial es el Centro de documentos: busca herramientas, muestra hasta cuatro por pagina en escritorio y usa tarjetas desplazables horizontalmente en movil.
+- El dashboard usa sidebar en escritorio y navegacion compacta en movil para Centro de documentos e Historial.
+- El tema predeterminado es oscuro. La preferencia se persiste en `localStorage` como `npc-theme`; solo el valor `light` activa el modo claro.
+- Cotizacion, informe, contrato y remision usan `DocumentWorkspace`, con pestañas independientes de Edicion y Vista previa. Mantiene el estado del formulario al alternar y funciona en cualquier viewport.
 
 Para agregar un modulo nuevo, sigue el patron existente: carpeta en `src/features/<modulo>/`, hook de formulario, tipos, validacion, componentes de formulario/vista previa, generador de archivo si aplica, y una rama explicita en `App.tsx`.
 
@@ -53,6 +56,7 @@ src/
     contrato/               contratos y ContractPDF
     remision/               remisiones y RemisionPDF
     contabilidad/           lectura, transformacion y exportacion Excel
+    history/                IndexedDB de exportaciones y vista Historial
   assets/                   logo y fuentes
   App.tsx                   seleccion y composicion de modulos
   main.tsx                  bootstrap y registro de fuentes
@@ -75,7 +79,12 @@ Dentro de los modulos documentales, la convencion es:
 - Informes guardan el correlativo en `localStorage` (`npr-numero`) y el borrador, incluidas fotos base64, en IndexedDB (`new-power-reports` / `drafts`). El formato es `IT-001`.
 - Los otros documentos tambien recuperan borradores desde sus respectivos `lib/storage.ts`; conserva sus formatos y claves al cambiarlos para no perder informacion local existente.
 - La generacion de PDF ocurre por hooks `useGenerate*Pdf` y componentes de `pdf/`. No rasterices los PDFs ni reemplaces `@react-pdf/renderer` sin una necesidad concreta.
+- Cada PDF y cada preview de cotizacion, informe, contrato y remision incluye la marca de agua discreta del logo. `DocumentWatermark` gobierna el navegador y los componentes `pdf/*PDF.tsx` gobiernan los PDFs.
 - Contabilidad trabaja con plantillas de Excel. Los cambios en `excelReader.ts`, `excelExporter.ts` o `excelUtils.ts` deben preservar formatos, formulas y estilos del archivo de origen. Cubre esos casos con pruebas.
+- El Historial usa una segunda IndexedDB (`new-power-export-history`, store `exports`) para guardar el Blob descargable, metadatos y, cuando aplica, una copia estructurada editable del documento.
+- Los PDFs nuevos de cotizacion, informe, contrato y remision se guardan con `editableData` e `isEditable: true`. Desde Historial, `Continuar editando` restaura el snapshot en el formulario del modulo correspondiente.
+- Excel de comprobantes se guarda como archivo descargable y metadatos de generacion, pero no es retomable: el Excel origen no se conserva. No marques un registro como editable si no se puede reconstruir su formulario con datos completos.
+- Los registros antiguos o creados antes de la version 2 de la base no contienen snapshot y solo permiten abrir, descargar o eliminar.
 
 ## Especificacion funcional actual
 
@@ -88,6 +97,7 @@ Esta seccion describe lo que el codigo implementa hoy. No inventes campos, integ
 **Datos del documento:**
 
 - Encabezado: numero, fecha y vigencia en dias.
+- Descripcion general opcional, ubicada entre el bloque de cliente y los items. Se renderiza tambien en `QuotePreview` y `QuotePDF` antes de la tabla de items.
 - Cliente: nombre y NIT obligatorios; ciudad, contacto y telefono opcionales.
 - Uno o mas items. Cada item tiene descripcion obligatoria, cantidad mayor que cero, valor unitario no negativo e impuesto entre 0 y 100.
 - Descuento global entre 0 y 100.
@@ -221,7 +231,7 @@ Esta seccion describe lo que el codigo implementa hoy. No inventes campos, integ
 ## Limites confirmados del producto
 
 - No hay API propia, base de datos, usuarios, roles, autenticacion, pagos, correo, WhatsApp ni sincronizacion entre dispositivos.
-- Los PDFs y Excel se generan y descargan en el cliente; no se archivan ni se envian automaticamente.
+- Los PDFs y Excel se generan y descargan en el cliente; los nuevos archivos tambien se archivan localmente en el Historial de ese navegador. No se envian automaticamente ni se sincronizan entre dispositivos.
 - Los correlativos son locales al navegador y dispositivo. No garantizan unicidad entre usuarios o equipos.
 - Las firmas de contrato y remision son datos de texto; no son firmas electronicas ni digitales.
 - La navegacion actual no persiste URLs ni admite enlaces directos a modulos.

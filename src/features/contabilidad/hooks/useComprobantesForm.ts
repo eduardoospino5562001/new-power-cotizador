@@ -4,6 +4,7 @@ import { ACCOUNT_CODE_OPTIONS, ACCOUNT, debitAccountForMedium } from '../lib/exc
 import { scanWorkbook } from '../lib/excelReader'
 import { exportWorkbook } from '../lib/excelExporter'
 import { saveAs } from 'file-saver'
+import { saveAndDownloadHistoryRecord } from '@/features/history/historyStore'
 
 const TEMPLATE_URL = '/Modelodeimportacion.xlsx'
 
@@ -34,7 +35,7 @@ export function useComprobantesForm() {
     CTA_KATHE: ACCOUNT_CODE_OPTIONS.BANCOLOMBIA,
     BANCOLOMBIA: ACCOUNT_CODE_OPTIONS.BANCOLOMBIA,
     DAVIVIENDA: ACCOUNT_CODE_OPTIONS.DAVIVIENDA,
-    CAJA: ACCOUNT_CODE_OPTIONS.CAJA,
+    CAJA: ACCOUNT_CODE_OPTIONS.EFECTIVO,
   })
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -180,7 +181,36 @@ export function useComprobantesForm() {
       const blob = new Blob([r.output as BlobPart], {
         type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
       })
-      saveAs(blob, filename)
+      await saveAndDownloadHistoryRecord({
+        blob,
+        name: filename,
+        module: 'contabilidad',
+        moduleId: 'contabilidad',
+        tool: 'Comprobantes',
+        mime: blob.type,
+        editableData: {
+          kind: 'contabilidad-export-metadata',
+          note: 'El libro fuente no se guarda en el historial, por lo que esta exportacion no se puede restaurar para editarla.',
+          sourceFile: {
+            name: sourceFile.name,
+            size: sourceFile.size,
+            type: sourceFile.type,
+            lastModified: sourceFile.lastModified,
+            restorable: false,
+          },
+          generation: {
+            project: selectedProject,
+            year: selectedYear,
+            month: selectedMonth,
+            startConsecutive,
+            accountMap,
+            sourceRowCount: r.rows.length,
+            outputRowCount: outputRows.length,
+            skippedMissingAmount: r.skippedMissingAmount,
+          },
+        },
+        isEditable: false,
+      })
       setResult(genResult)
       setSuccess('Archivo generado y descargado. Revisa el contenido en el visor.')
     } catch (err) {

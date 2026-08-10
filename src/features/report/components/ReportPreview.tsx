@@ -2,7 +2,7 @@ import type { Control } from 'react-hook-form'
 import { useWatch } from 'react-hook-form'
 import type { InformeFormData } from '../logic/validation'
 import type { InformeTecnico } from '../types'
-import { Card, Button } from '@/components/ui'
+import { Card, Button, DocumentWatermark } from '@/components/ui'
 import { Loader2 } from 'lucide-react'
 import { formatDate } from '../lib/format'
 
@@ -52,7 +52,7 @@ export function ReportPreview({ control, onGeneratePdf, generating, pdfError }: 
   }
 
   return (
-    <Card className="border-2 border-brand-orange shadow-md">
+    <Card className="relative isolate overflow-hidden border-2 border-brand-orange shadow-md">
       <div className="text-center mb-4 pb-3 border-b border-brand-orange-light">
         <h2 className="text-xl font-bold text-brand-dark tracking-tight">INFORME TÉCNICO</h2>
         <p className="text-sm text-brand-gray">No. {numero}</p>
@@ -121,6 +121,7 @@ export function ReportPreview({ control, onGeneratePdf, generating, pdfError }: 
         )}
         {pdfError && <p className="text-xs text-red-500 mt-2 text-center">{pdfError}</p>}
       </div>
+      <DocumentWatermark />
     </Card>
   )
 }

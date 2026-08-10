@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Header, Footer, PageContainer } from '@/components/layout'
+import { Header, Footer, PageContainer, DocumentWorkspace } from '@/components/layout'
 import { Button, Card } from '@/components/ui'
 import { ChevronLeft, ChevronRight, FileText, Receipt, Calculator, FileSignature, Search, Truck } from 'lucide-react'
 import { HistoryPage } from '@/features/history/HistoryPage'
@@ -288,12 +288,7 @@ function App() {
 
       {modulo === 'quote' && (
         <PageContainer>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div><QuoteForm form={quoteForm} /></div>
-            <div className="lg:sticky lg:top-6 lg:self-start">
-              <QuotePreview control={quoteForm.control} onGeneratePdf={handleGenerateQuotePdf} generating={generatingQuote} pdfError={pdfErrorQuote} />
-            </div>
-          </div>
+          <DocumentWorkspace editor={<QuoteForm form={quoteForm} />} preview={<QuotePreview control={quoteForm.control} onGeneratePdf={handleGenerateQuotePdf} generating={generatingQuote} pdfError={pdfErrorQuote} />} />
         </PageContainer>
       )}
 
@@ -301,12 +296,7 @@ function App() {
 
       {modulo === 'report' && (
         <PageContainer>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div><ReportForm form={reportForm} /></div>
-            <div className="lg:sticky lg:top-6 lg:self-start">
-              <ReportPreview control={reportForm.control} onGeneratePdf={handleGenerateReportPdf} generating={generatingReport} pdfError={pdfErrorReport} />
-            </div>
-          </div>
+          <DocumentWorkspace editor={<ReportForm form={reportForm} />} preview={<ReportPreview control={reportForm.control} onGeneratePdf={handleGenerateReportPdf} generating={generatingReport} pdfError={pdfErrorReport} />} />
         </PageContainer>
       )}
 
@@ -318,23 +308,13 @@ function App() {
 
       {modulo === 'contrato' && (
         <PageContainer>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div><ContractForm form={contratoForm} /></div>
-            <div className="lg:sticky lg:top-6 lg:self-start">
-              <ContractPreview control={contratoForm.control} onGeneratePdf={handleGenerateContratoPdf} generating={generatingContrato} pdfError={pdfErrorContrato} />
-            </div>
-          </div>
+          <DocumentWorkspace editor={<ContractForm form={contratoForm} />} preview={<ContractPreview control={contratoForm.control} onGeneratePdf={handleGenerateContratoPdf} generating={generatingContrato} pdfError={pdfErrorContrato} />} />
         </PageContainer>
       )}
 
       {modulo === 'remision' && (
         <PageContainer>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div><RemisionForm form={remisionForm} /></div>
-            <div className="lg:sticky lg:top-6 lg:self-start">
-              <RemisionPreview control={remisionForm.control} onGeneratePdf={handleGenerateRemisionPdf} generating={generatingRemision} pdfError={pdfErrorRemision} />
-            </div>
-          </div>
+          <DocumentWorkspace editor={<RemisionForm form={remisionForm} />} preview={<RemisionPreview control={remisionForm.control} onGeneratePdf={handleGenerateRemisionPdf} generating={generatingRemision} pdfError={pdfErrorRemision} />} />
         </PageContainer>
       )}
 

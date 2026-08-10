@@ -4,22 +4,21 @@ export const ACCOUNT_CODE_OPTIONS: Record<string, number> = {
   EFECTIVO: 11050501,
   BANCOLOMBIA: 11100504,
   DAVIVIENDA: 11100505,
-  CAJA: 11050501,
 }
 
 export const SOURCE_MEDIUM_KEYS: [string, string][] = [
   ['DAVIVIENDA', 'DAVIVIENDA'],
   ['BANCOLOMBIA', 'BANCOLOMBIA'],
   ['EFECTIVO', 'EFECTIVO'],
+  ['CAJA', 'CAJA'],
   ['BONIFICACION', 'BONIFICACION'],
   ['CTA ARQ', 'CTA ARQ'],
   ['CTA KATHE', 'CTA KATHE'],
-  ['CAJA', 'CAJA'],
 ]
 
 export const ACCOUNT = {
   DEBIT_DEFAULT: 556,
-  CREDIT_FUND: '28050501',
+  CREDIT_FUND: 28050501,
   CURRENCY_CODE: 'COP',
   DOC_TYPE: 'RCBO',
 }
@@ -49,6 +48,21 @@ export function parseInstallment(label: unknown): number | null {
   const match = text.match(/^cuota\s*(\d+)/)
   if (!match) return null
   return parseInt(match[1], 10)
+}
+
+export function parseReceiptConsecutive(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') return null
+
+  if (typeof value === 'number') {
+    if (!Number.isSafeInteger(value) || value < 0 || String(value).length > 11) return null
+    return value
+  }
+
+  const text = String(value).trim()
+  if (!/^\d{1,11}$/.test(text)) return null
+
+  const parsed = Number(text)
+  return Number.isSafeInteger(parsed) ? parsed : null
 }
 
 export function debitAccountForMedium(medium: string, accountMap?: AccountMap): number {

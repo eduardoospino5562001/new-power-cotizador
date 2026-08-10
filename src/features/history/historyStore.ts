@@ -110,7 +110,8 @@ function downloadBlob(blob: Blob, name: string) {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  // Firefox may still be resolving a download after link.click() returns.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 export async function createHistoryRecord(input: CreateHistoryRecordInput): Promise<HistoryRecord> {
@@ -160,7 +161,8 @@ export async function downloadHistoryRecord(id: string): Promise<void> {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
-  URL.revokeObjectURL(url)
+  // Keep the blob alive long enough for browsers that open PDFs before saving.
+  window.setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 export async function deleteHistoryRecord(id: string): Promise<void> {

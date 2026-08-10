@@ -1,6 +1,6 @@
 import * as XLSX from 'xlsx'
 import type { ProjectInfo, SourceRow, ScanResult } from '../types'
-import { parseCurrency, parseInstallment } from './excelUtils'
+import { normalizeText, parseCurrency, parseInstallment, parseReceiptConsecutive } from './excelUtils'
 
 const COL_LOTE = 0
 const COL_FECHA = 5
@@ -10,10 +10,35 @@ const COL_COMPRADOR = 9
 const COL_ETIQUETA = 10
 const COL_PROYECTO = 14
 
+const RECEIPT_HEADERS = new Set([
+  'NUMERO DE RECIBO',
+  'NUMERO RECIBO',
+  'NO DE RECIBO',
+  'N DE RECIBO',
+])
+
 function cellValue(ws: XLSX.WorkSheet, row: number, col: number): unknown {
   const ref = XLSX.utils.encode_cell({ r: row, c: col })
   const cell = ws[ref]
   return cell ? cell.v : undefined
+}
+
+function normalizeHeader(value: unknown): string {
+  return normalizeText(value === null || value === undefined ? '' : String(value))
+    .replace(/[^A-Z0-9]+/g, ' ')
+    .trim()
+}
+
+function findReceiptColumn(ws: XLSX.WorkSheet): number {
+  const ref = ws['!ref']
+  if (!ref) throw new Error('El archivo origen no tiene datos.')
+
+  const maxColumn = XLSX.utils.decode_range(ref).e.c
+  for (let col = 0; col <= maxColumn; col++) {
+    if (RECEIPT_HEADERS.has(normalizeHeader(cellValue(ws, 0, col)))) return col
+  }
+
+  throw new Error("No se encontro la columna 'Numero de recibo' en el archivo origen.")
 }
 
 export function scanProjects(ws: XLSX.WorkSheet, maxRow: number): Record<string, ProjectInfo> {
@@ -81,6 +106,7 @@ export function collectSourceRows(
 ): { rows: SourceRow[]; skippedMissingAmount: number } {
   const rows: SourceRow[] = []
   let skippedMissingAmount = 0
+  const receiptColumn = findReceiptColumn(ws)
 
   for (let r = 1; r < maxRow; r++) {
     const values: unknown[] = []
@@ -107,14 +133,19 @@ export function collectSourceRows(
     }
     if (values[COL_COMPRADOR] === undefined || values[COL_COMPRADOR] === null || values[COL_COMPRADOR] === '') throw new Error(`Fila ${r + 1}: falta Comprador.`)
 
+    const receipt = parseReceiptConsecutive(cellValue(ws, r, receiptColumn))
+    if (receipt === null) {
+      throw new Error(`Fila ${r + 1}: el Numero de recibo debe ser un entero de maximo 11 digitos.`)
+    }
+
     rows.push({
       lot: String(lot).trim(),
       date: dateValue,
       medium: String(values[COL_MEDIO]),
       amount,
       label: values[COL_ETIQUETA] !== undefined && values[COL_ETIQUETA] !== null ? String(values[COL_ETIQUETA]).trim() : '',
-      receipt: values[4] !== undefined && values[4] !== null ? String(values[4]) : null,
-      thirdId: values[3] !== undefined && values[3] !== null ? String(values[3]) : null,
+      receipt,
+      thirdId: values[3] !== undefined && values[3] !== null ? values[3] as string | number : null,
       installment: parseInstallment(values[COL_ETIQUETA]),
     })
   }

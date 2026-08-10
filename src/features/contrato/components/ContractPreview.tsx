@@ -1,7 +1,7 @@
 import { useWatch } from 'react-hook-form'
 import type { Control } from 'react-hook-form'
 import type { ContratoFormData } from '../logic/validation'
-import { Button } from '@/components/ui'
+import { Button, DocumentWatermark } from '@/components/ui'
 import { formatCurrency, formatDate } from '../lib/format'
 import Logo from '@/assets/logo.jpeg'
 
@@ -23,7 +23,7 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
 
   return (
     <section className="space-y-6">
-      <div className="rounded-xl bg-white border border-brand-orange-light p-4 shadow-sm sm:p-6">
+      <div className="relative isolate overflow-hidden rounded-xl bg-white border border-brand-orange-light p-4 shadow-sm sm:p-6">
         <div className="mb-6 flex flex-col gap-4 border-b-2 border-brand-orange pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3">
             <img src={Logo} alt="Logo" className="w-16 h-16 object-contain rounded" />
@@ -122,6 +122,7 @@ export function ContractPreview({ control, onGeneratePdf, generating, pdfError }
             <p className="text-xs text-brand-gray">C.C.</p>
           </div>
         </div>
+        <DocumentWatermark />
       </div>
 
       {pdfError && (
