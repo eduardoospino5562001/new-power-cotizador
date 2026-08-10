@@ -10,7 +10,7 @@ interface QuoteFormProps {
 }
 
 export function QuoteForm({ form }: QuoteFormProps) {
-  const { register, control, fields, addItem, removeItem, empezarNueva } = form
+  const { register, control, fields, addItem, removeItem, moveItem, empezarNueva } = form
   const fecha = useWatch({ control, name: 'fecha' })
   const validez = useWatch({ control, name: 'validezDias' })
 
@@ -38,6 +38,10 @@ export function QuoteForm({ form }: QuoteFormProps) {
       </Card>
 
       <Card>
+        <TextArea label="Descripción" placeholder="Descripción general de la cotización" {...register('descripcion')} />
+      </Card>
+
+      <Card>
         <h2 className="text-lg font-bold text-brand-dark mb-4">Datos del cliente</h2>
         <div className="space-y-3">
           <Input label="Nombre *" {...register('cliente.nombre')} placeholder="Nombre del cliente" />
@@ -52,7 +56,7 @@ export function QuoteForm({ form }: QuoteFormProps) {
       <Card>
         <h2 className="text-lg font-bold text-brand-dark mb-4">Ítems</h2>
         <div className="space-y-2">
-          <div className="grid grid-cols-12 gap-2 text-xs font-semibold text-brand-gray px-1">
+          <div className="hidden grid-cols-12 gap-2 px-1 text-xs font-semibold text-brand-gray sm:grid">
             <span className="col-span-1 text-center">#</span>
             <span className="col-span-3">Descripción</span>
             <span className="col-span-2">Cantidad</span>
@@ -70,6 +74,8 @@ export function QuoteForm({ form }: QuoteFormProps) {
               control={control}
               onRemove={() => removeItem(index)}
               canRemove={fields.length > 1}
+              total={fields.length}
+              onMove={moveItem}
             />
           ))}
 

@@ -3,7 +3,7 @@ import { useWatch } from 'react-hook-form'
 import type { RemisionFormReturn } from '../hooks/useRemisionForm'
 import type { Control } from 'react-hook-form'
 import type { RemisionFormData } from '../logic/validation'
-import { Card, Input, TextArea, Button } from '@/components/ui'
+import { Card, Input, TextArea, Button, SortableItem } from '@/components/ui'
 import { Trash2, Plus } from 'lucide-react'
 
 function parseHora(val: string): { time: string; ampm: string } {
@@ -61,9 +61,11 @@ export function RemisionForm({ form }: RemisionFormProps) {
     logFields,
     appendLog,
     removeLog,
+    moveLog,
     detFields,
     appendDet,
     removeDet,
+    moveDet,
     control,
   } = form
 
@@ -87,11 +89,11 @@ export function RemisionForm({ form }: RemisionFormProps) {
   return (
     <section className="space-y-6">
       <Card>
-        <div className="flex justify-between items-center mb-4">
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-lg font-bold text-brand-dark">Remisión</h2>
           <Button type="button" variant="ghost" size="sm" onClick={empezarNueva}>+ Nuevo</Button>
         </div>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input label="N.º Remisión" {...register('numero')} />
           <Input label="Fecha" type="date" {...register('fecha')} />
           <Input label="N.º Pedido" {...register('pedido')} placeholder="OP-00125" />
@@ -101,7 +103,7 @@ export function RemisionForm({ form }: RemisionFormProps) {
 
       <Card>
         <h2 className="text-lg font-bold text-brand-dark mb-4">Cliente</h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <Input label="Nombre *" {...register('cliente.nombre')} placeholder="Nombre del cliente" />
           <Input label="CC / NIT *" {...register('cliente.ccNit')} placeholder="Número de identificación" />
           <Input label="Dirección" {...register('cliente.direccion')} placeholder="Dirección (opcional)" />
@@ -111,9 +113,9 @@ export function RemisionForm({ form }: RemisionFormProps) {
       </Card>
 
       <Card>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-bold text-brand-dark">Información Logística</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {selectedLogs.size > 0 && (
               <Button type="button" variant="ghost" size="sm" onClick={() => eliminarSeleccionados(setSelectedLogs, removeLog, selectedLogs)}>
                 <Trash2 size={16} className="mr-1" /> ({selectedLogs.size})
@@ -127,26 +129,28 @@ export function RemisionForm({ form }: RemisionFormProps) {
             </Button>
           </div>
         </div>
-        <div className="space-y-2">
-          {logFields.map((field, index) => (
-            <div key={field.id} className="flex items-start gap-2">
-              <input type="checkbox" checked={selectedLogs.has(index)} onChange={() => toggleSel(setSelectedLogs, index)} className="accent-brand-orange mt-2 shrink-0" />
-              <div className="flex-1">
+          <div className="space-y-2">
+            {logFields.map((field, index) => (
+            <SortableItem key={field.id} index={index} total={logFields.length} listId="remision-logistics" label={`dato logístico ${index + 1}`} onMove={(from, to) => { moveLog(from, to); setSelectedLogs(new Set()) }} className="rounded-lg border border-brand-orange-light/60 bg-transparent p-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+              <input type="checkbox" checked={selectedLogs.has(index)} onChange={() => toggleSel(setSelectedLogs, index)} className="mt-3 size-4 accent-brand-orange shrink-0" />
+              <div className="min-w-0 flex-1">
                 <Input placeholder="Nombre" {...register(`logistica.${index}.nombre` as const)} />
               </div>
-              <div className="flex-[2]">
+              <div className="min-w-0 flex-[2]">
                 <Input placeholder="Valor" {...register(`logistica.${index}.valor` as const)} />
               </div>
-              <button type="button" onClick={() => { removeLog(index); setSelectedLogs((prev) => { const n = new Set(prev); n.delete(index); return n }) }} className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors" title="Eliminar"><Trash2 size={18} /></button>
+              <button type="button" onClick={() => { removeLog(index); setSelectedLogs(new Set()) }} className="self-end p-2 text-brand-gray hover:text-red-500 transition-colors sm:mt-1 sm:self-auto" title="Eliminar"><Trash2 size={18} /></button>
             </div>
+            </SortableItem>
           ))}
         </div>
       </Card>
 
       <Card>
-        <div className="flex items-center justify-between mb-4">
+        <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <h2 className="text-lg font-bold text-brand-dark">Detalle de Entrega</h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             {selectedDets.size > 0 && (
               <Button type="button" variant="ghost" size="sm" onClick={() => eliminarSeleccionados(setSelectedDets, removeDet, selectedDets)}>
                 <Trash2 size={16} className="mr-1" /> ({selectedDets.size})
@@ -160,21 +164,21 @@ export function RemisionForm({ form }: RemisionFormProps) {
             </Button>
           </div>
         </div>
-        <div className="space-y-3">
-          {detFields.map((field, index) => (
-            <div key={field.id} className="border border-brand-orange-light rounded-lg p-3">
-              <div className="flex items-start gap-2 mb-2">
-                <input type="checkbox" checked={selectedDets.has(index)} onChange={() => toggleSel(setSelectedDets, index)} className="accent-brand-orange mt-2 shrink-0" />
-                <div className="grid grid-cols-5 gap-2 flex-1">
+          <div className="space-y-3">
+            {detFields.map((field, index) => (
+            <SortableItem key={field.id} index={index} total={detFields.length} listId="remision-details" label={`detalle ${index + 1}`} onMove={(from, to) => { moveDet(from, to); setSelectedDets(new Set()) }} className="rounded-lg border border-brand-orange-light p-3">
+              <div className="mb-2 flex flex-col gap-2 sm:flex-row sm:items-start">
+                <input type="checkbox" checked={selectedDets.has(index)} onChange={() => toggleSel(setSelectedDets, index)} className="mt-3 size-4 accent-brand-orange shrink-0" />
+                <div className="grid min-w-0 flex-1 grid-cols-2 gap-2 sm:grid-cols-5">
                   <Input placeholder="Cant." {...register(`detalles.${index}.cantidad` as const)} />
                   <Input placeholder="Código" {...register(`detalles.${index}.codigo` as const)} />
-                  <Input placeholder="Descripción" className="col-span-2" {...register(`detalles.${index}.descripcion` as const)} />
+                  <Input placeholder="Descripción" className="col-span-2 sm:col-span-2" {...register(`detalles.${index}.descripcion` as const)} />
                   <Input placeholder="Serial" {...register(`detalles.${index}.serial` as const)} />
                 </div>
-                <button type="button" onClick={() => { removeDet(index); setSelectedDets((prev) => { const n = new Set(prev); n.delete(index); return n }) }} className="p-1 text-brand-gray hover:text-red-500 transition-colors shrink-0 mt-1" title="Eliminar"><Trash2 size={18} /></button>
+                <button type="button" onClick={() => { removeDet(index); setSelectedDets(new Set()) }} className="self-end p-2 text-brand-gray hover:text-red-500 transition-colors shrink-0 sm:mt-1 sm:self-auto" title="Eliminar"><Trash2 size={18} /></button>
               </div>
               <Input placeholder="Observaciones del ítem" {...register(`detalles.${index}.observaciones` as const)} />
-            </div>
+            </SortableItem>
           ))}
         </div>
       </Card>
@@ -186,7 +190,7 @@ export function RemisionForm({ form }: RemisionFormProps) {
 
       <Card>
         <h2 className="text-lg font-bold text-brand-dark mb-4">Firmas</h2>
-        <div className="grid grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 md:gap-6">
           <div>
             <h3 className="text-sm font-bold text-brand-dark mb-3 uppercase">Entrega</h3>
             <div className="space-y-2">

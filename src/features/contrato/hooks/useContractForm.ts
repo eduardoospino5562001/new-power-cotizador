@@ -143,6 +143,15 @@ export function useContractForm() {
     setValue(`grupos.${grupoIndex}.items`, items.filter((_, i) => i !== itemIndex))
   }, [getValues, setValue])
 
+  const moveItemInGrupo = useCallback((grupoIndex: number, from: number, to: number) => {
+    const grupos = getValues('grupos') || []
+    const items = [...(grupos[grupoIndex]?.items || [])]
+    if (from < 0 || to < 0 || from >= items.length || to >= items.length || from === to) return
+    const [item] = items.splice(from, 1)
+    items.splice(to, 0, item)
+    setValue(`grupos.${grupoIndex}.items`, items)
+  }, [getValues, setValue])
+
   useEffect(() => {
     const sub = watch((data, { name }) => {
       if (name === 'economico.valorTotal' || name === 'economico.pagoInicial') {
@@ -176,11 +185,14 @@ export function useContractForm() {
     gruposFields: gruposFieldArray.fields,
     appendGrupo: gruposFieldArray.append,
     removeGrupo: gruposFieldArray.remove,
+    moveGrupo: gruposFieldArray.move,
     addItemToGrupo,
     removeItemFromGrupo,
+    moveItemInGrupo,
     clausulasFields: clausulasFieldArray.fields,
     appendClausula: clausulasFieldArray.append,
     removeClausula: clausulasFieldArray.remove,
+    moveClausula: clausulasFieldArray.move,
     empezarNueva,
   }
 }

@@ -3,6 +3,7 @@ import { pdf } from '@react-pdf/renderer'
 import { ContractPDF } from '../pdf/ContractPDF'
 import type { ContratoCompraventa } from '../types'
 import logoUrl from '@/assets/logo.jpeg'
+import { saveAndDownloadHistoryRecord } from '@/features/history/historyStore'
 
 async function imagenABase64(url: string): Promise<string> {
   const respuesta = await fetch(url)
@@ -34,16 +35,17 @@ export function useGenerateContractPdf() {
 
       const doc = <ContractPDF contrato={contrato} logoSrc={logoSrc} />
       const blob = await pdf(doc).toBlob()
-      const url = URL.createObjectURL(blob)
       const filename = `Contrato-${contrato.numero}.pdf`
-
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      await saveAndDownloadHistoryRecord({
+        blob,
+        name: filename,
+        module: 'contratos',
+        moduleId: 'contract',
+        tool: 'Contrato de compraventa',
+        mime: 'application/pdf',
+        editableData: contrato,
+        isEditable: true,
+      })
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : String(err)
       console.error('PDF generation error:', mensaje)

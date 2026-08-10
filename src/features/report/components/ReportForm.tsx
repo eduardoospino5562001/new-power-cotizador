@@ -1,6 +1,6 @@
 import type { ReportFormReturn } from '../hooks/useReportForm'
 import { PhotoGroup } from './PhotoGroup'
-import { Card, Input, TextArea, Button } from '@/components/ui'
+import { Card, Input, TextArea, Button, SortableItem } from '@/components/ui'
 import { Plus } from 'lucide-react'
 
 interface ReportFormProps {
@@ -44,18 +44,15 @@ export function ReportForm({ form }: ReportFormProps) {
             </Card>
           )}
           {grupos.map((field, index) => (
-            <PhotoGroup
-              key={field.id}
+            <SortableItem key={field.id} index={index} total={grupos.length} listId="report-groups" label={`grupo de fotos ${index + 1}`} onMove={moveGrupo}>
+              <PhotoGroup
               index={index}
               register={register}
               control={control}
               onRemove={() => removeGrupo(index)}
               canRemove={grupos.length > 1}
-              onMoveUp={index > 0 ? () => moveGrupo(index, index - 1) : undefined}
-              onMoveDown={index < grupos.length - 1 ? () => moveGrupo(index, index + 1) : undefined}
-              isFirst={index === 0}
-              isLast={index === grupos.length - 1}
-            />
+              />
+            </SortableItem>
           ))}
 
           <div className="flex justify-center pt-2">

@@ -76,6 +76,16 @@ const styles = StyleSheet.create({
     color: '#44403c',
     marginTop: 1,
   },
+  descripcion: {
+    marginBottom: 16,
+    paddingHorizontal: 2,
+    fontSize: 9,
+    color: '#44403c',
+  },
+  descripcionLabel: {
+    fontWeight: 700,
+    color: '#1c1917',
+  },
   tabla: {
     marginBottom: 16,
   },
@@ -198,6 +208,10 @@ export function QuotePDF({ cotizacion, logoSrc }: QuotePDFProps) {
             <Text style={styles.clienteExtra}>Vendedor: {cotizacion.vendedor}</Text>
           )}
         </View>
+
+        {cotizacion.descripcion && (
+          <Text style={styles.descripcion}><Text style={styles.descripcionLabel}>Descripción: </Text>{cotizacion.descripcion}</Text>
+        )}
 
         <View style={styles.tabla}>
           <View style={styles.tablaHeader}>

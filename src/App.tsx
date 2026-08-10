@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from 'react'
 import { Header, Footer, PageContainer } from '@/components/layout'
 import { Button, Card } from '@/components/ui'
-import { FileText, Receipt, Calculator, Home, FileSignature, Truck } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, Receipt, Calculator, FileSignature, Search, Truck } from 'lucide-react'
+import { HistoryPage } from '@/features/history/HistoryPage'
 
 import { useQuoteForm } from '@/features/quote/hooks/useQuoteForm'
 import { useGeneratePdf } from '@/features/quote/hooks/useGeneratePdf'
@@ -36,11 +37,20 @@ import { RemisionPreview } from '@/features/remision/components/RemisionPreview'
 import { cargarBorrador as cargarBorradorRemision, borrarBorrador as borrarBorradorRemision } from '@/features/remision/lib/storage'
 import type { RemisionFormData } from '@/features/remision/logic/validation'
 import type { Remision } from '@/features/remision/types'
+import type { HistoryRecord } from '@/features/history/historyStore'
 
-type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contrato' | 'remision'
+type Modulo = 'home' | 'quote' | 'report' | 'contabilidad' | 'contrato' | 'remision' | 'history'
 
 function App() {
   const [modulo, setModulo] = useState<Modulo>('home')
+  const [darkMode, setDarkMode] = useState(() => localStorage.getItem('npc-theme') !== 'light')
+  const [toolQuery, setToolQuery] = useState('')
+  const [toolPage, setToolPage] = useState(0)
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = darkMode ? 'dark' : 'light'
+    localStorage.setItem('npc-theme', darkMode ? 'dark' : 'light')
+  }, [darkMode])
 
   const quoteForm = useQuoteForm()
   const { generate: generateQuote, generating: generatingQuote, error: pdfErrorQuote } = useGeneratePdf()
@@ -74,6 +84,38 @@ function App() {
   }, [])
 
   const irAHome = useCallback(() => setModulo('home'), [])
+
+  const tools = [
+    { module: 'quote' as const, title: 'Nueva cotización', description: 'Ítems, impuestos y totales.', icon: Receipt },
+    { module: 'report' as const, title: 'Nuevo informe técnico', description: 'Registro fotográfico y observaciones.', icon: FileText },
+    { module: 'contabilidad' as const, title: 'Herramientas contables', description: 'Comprobantes desde Excel.', icon: Calculator },
+    { module: 'contrato' as const, title: 'Contrato de compraventa', description: 'Cláusulas, condiciones y firmas.', icon: FileSignature },
+    { module: 'remision' as const, title: 'Remisión', description: 'Detalle de entrega y firmas.', icon: Truck },
+  ]
+  const filteredTools = tools.filter((tool) => tool.title.toLowerCase().includes(toolQuery.trim().toLowerCase()))
+  const toolPages = Math.max(1, Math.ceil(filteredTools.length / 4))
+  const visibleTools = filteredTools.slice(toolPage * 4, toolPage * 4 + 4)
+
+  const resumeHistoryRecord = (record: HistoryRecord) => {
+    if (!record.isEditable || !record.editableData || !record.moduleId) return
+    if (record.moduleId === 'quote') {
+      quoteForm.reset(record.editableData as CotizacionFormData)
+      setDraftQuote(false)
+      setModulo('quote')
+    } else if (record.moduleId === 'report') {
+      reportForm.reset(record.editableData as InformeFormData)
+      setDraftReport(false)
+      setModulo('report')
+    } else if (record.moduleId === 'contract') {
+      contratoForm.reset(record.editableData as ContratoFormData)
+      setDraftContrato(false)
+      setModulo('contrato')
+    } else if (record.moduleId === 'remision') {
+      remisionForm.reset(record.editableData as RemisionFormData)
+      setDraftRemision(false)
+      setModulo('remision')
+    }
+  }
 
   const descartarBorradorQuote = () => {
     borrarBorradorQuote()
@@ -188,59 +230,15 @@ function App() {
   if (modulo === 'home') {
     return (
       <>
-        <Header />
+        <Header onHome={irAHome} onHistory={() => setModulo('history')} darkMode={darkMode} onToggleTheme={() => setDarkMode((value) => !value)} />
         <PageContainer>
-          <div className="flex flex-col items-center justify-center min-h-[60vh] gap-6">
-            <h2 className="text-2xl font-bold text-brand-dark text-center">
-              ¿Qué deseas crear?
-            </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 w-full max-w-7xl">
-              <button onClick={() => setModulo('quote')} className="group w-full h-full">
-                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer h-full flex flex-col">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Receipt size={32} className="text-brand-orange-dark" />
-                  </div>
-                  <h3 className="text-lg font-bold text-brand-dark mb-2">Nueva cotización</h3>
-                  <p className="text-sm text-brand-gray">Genera una cotización profesional con ítems, impuestos y totales</p>
-                </Card>
-              </button>
-              <button onClick={() => setModulo('report')} className="group w-full h-full">
-                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer h-full flex flex-col">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <FileText size={32} className="text-brand-orange-dark" />
-                  </div>
-                  <h3 className="text-lg font-bold text-brand-dark mb-2">Nuevo informe técnico</h3>
-                  <p className="text-sm text-brand-gray">Crea un informe técnico con registro fotográfico y observaciones</p>
-                </Card>
-              </button>
-              <button onClick={() => setModulo('contabilidad')} className="group w-full h-full">
-                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer h-full flex flex-col">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Calculator size={32} className="text-brand-orange-dark" />
-                  </div>
-                  <h3 className="text-lg font-bold text-brand-dark mb-2">Herramientas contables</h3>
-                  <p className="text-sm text-brand-gray">Genera comprobantes contables desde Excel</p>
-                </Card>
-              </button>
-              <button onClick={() => setModulo('contrato')} className="group w-full h-full">
-                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer h-full flex flex-col">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <FileSignature size={32} className="text-brand-orange-dark" />
-                  </div>
-                  <h3 className="text-lg font-bold text-brand-dark mb-2">Contrato de compraventa</h3>
-                  <p className="text-sm text-brand-gray">Genera un contrato de compraventa con cláusulas y firmas</p>
-                </Card>
-              </button>
-              <button onClick={() => setModulo('remision')} className="group w-full h-full">
-                <Card className="p-8 text-center hover:border-brand-orange hover:shadow-lg transition-all cursor-pointer h-full flex flex-col">
-                  <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-brand-orange-light flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Truck size={32} className="text-brand-orange-dark" />
-                  </div>
-                  <h3 className="text-lg font-bold text-brand-dark mb-2">Remisión</h3>
-                  <p className="text-sm text-brand-gray">Genera una remisión con detalle de entrega y firmas</p>
-                </Card>
-              </button>
+          <div className="mx-auto max-w-6xl py-5 sm:py-10">
+            <div className="mb-6 flex flex-col gap-4 border-b border-brand-orange-light pb-5 sm:flex-row sm:items-center sm:justify-between"><p className="text-sm font-semibold uppercase tracking-[0.18em] text-brand-orange">Centro de documentos</p><label className="relative block w-full sm:max-w-xs"><Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-brand-gray" size={18} /><input value={toolQuery} onChange={(event) => { setToolQuery(event.target.value); setToolPage(0) }} placeholder="Buscar herramienta" className="w-full rounded-lg border border-brand-orange-light bg-white py-2.5 pl-10 pr-3 text-sm text-brand-dark outline-none focus:ring-2 focus:ring-brand-orange" /></label></div>
+            <div className="flex snap-x gap-4 overflow-x-auto pb-2 sm:grid sm:grid-cols-2 sm:overflow-visible">
+              {visibleTools.map((tool) => { const Icon = tool.icon; return <button key={tool.module} onClick={() => setModulo(tool.module)} className="w-[84vw] shrink-0 snap-start text-left sm:w-auto"><Card className="h-full min-h-52 p-7 shadow-none transition-colors hover:border-brand-orange hover:bg-brand-light sm:p-8"><div className="mb-9 flex size-12 items-center justify-center rounded-lg bg-brand-orange-light text-brand-orange-dark"><Icon size={29} /></div><h3 className="mb-2 text-lg font-bold text-brand-dark">{tool.title}</h3><p className="text-sm text-brand-gray">{tool.description}</p></Card></button> })}
+              {visibleTools.length === 0 && <Card className="w-full py-12 text-center sm:col-span-2"><p className="text-sm text-brand-gray">No encontramos herramientas con ese nombre.</p></Card>}
             </div>
+            {filteredTools.length > 4 && <div className="mt-6 flex items-center justify-center gap-3"><Button type="button" variant="secondary" size="sm" disabled={toolPage === 0} onClick={() => setToolPage(toolPage - 1)} aria-label="Ver herramientas anteriores"><ChevronLeft size={18} /><span className="hidden sm:inline">Anterior</span></Button><span className="min-w-10 text-center text-sm text-brand-gray">{toolPage + 1} / {toolPages}</span><Button type="button" variant="secondary" size="sm" disabled={toolPage >= toolPages - 1} onClick={() => setToolPage(toolPage + 1)} aria-label="Ver siguientes herramientas"><span className="hidden sm:inline">Siguiente</span><ChevronRight size={18} /></Button></div>}
           </div>
         </PageContainer>
         <Footer />
@@ -250,15 +248,11 @@ function App() {
 
   return (
     <>
-      <Header>
-        <button onClick={irAHome} className="flex items-center gap-1 text-sm text-brand-orange-light hover:text-white transition-colors">
-          <Home size={20} />
-        </button>
-      </Header>
+      <Header onHome={irAHome} onHistory={() => setModulo('history')} darkMode={darkMode} onToggleTheme={() => setDarkMode((value) => !value)} />
 
       {modulo === 'quote' && draftQuote && (
-        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+        <div className="px-4 py-3 lg:ml-64 lg:px-10">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 rounded-xl border border-brand-orange-light bg-brand-light px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-brand-dark">Borrador de cotización recuperado automáticamente.</p>
             <Button variant="ghost" size="sm" onClick={descartarBorradorQuote}>Descartar</Button>
           </div>
@@ -266,8 +260,8 @@ function App() {
       )}
 
       {modulo === 'report' && draftReport && (
-        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+        <div className="px-4 py-3 lg:ml-64 lg:px-10">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 rounded-xl border border-brand-orange-light bg-brand-light px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-brand-dark">Borrador de informe recuperado automáticamente.</p>
             <Button variant="ghost" size="sm" onClick={descartarBorradorReport}>Descartar</Button>
           </div>
@@ -275,8 +269,8 @@ function App() {
       )}
 
       {modulo === 'contrato' && draftContrato && (
-        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+        <div className="px-4 py-3 lg:ml-64 lg:px-10">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 rounded-xl border border-brand-orange-light bg-brand-light px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-brand-dark">Borrador de contrato recuperado automáticamente.</p>
             <Button variant="ghost" size="sm" onClick={descartarBorradorContrato}>Descartar</Button>
           </div>
@@ -284,8 +278,8 @@ function App() {
       )}
 
       {modulo === 'remision' && draftRemision && (
-        <div className="bg-brand-orange-light/60 border-b border-brand-orange-light px-4 py-2">
-          <div className="max-w-7xl mx-auto flex items-center justify-between text-sm">
+        <div className="px-4 py-3 lg:ml-64 lg:px-10">
+          <div className="mx-auto flex max-w-6xl flex-col gap-2 rounded-xl border border-brand-orange-light bg-brand-light px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
             <p className="text-brand-dark">Borrador de remisión recuperado automáticamente.</p>
             <Button variant="ghost" size="sm" onClick={descartarBorradorRemision}>Descartar</Button>
           </div>
@@ -302,6 +296,8 @@ function App() {
           </div>
         </PageContainer>
       )}
+
+      {modulo === 'history' && <PageContainer><HistoryPage onResume={resumeHistoryRecord} /></PageContainer>}
 
       {modulo === 'report' && (
         <PageContainer>

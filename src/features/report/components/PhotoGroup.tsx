@@ -12,10 +12,6 @@ interface PhotoGroupProps {
   control: Control<InformeFormData>
   onRemove: () => void
   canRemove: boolean
-  onMoveUp?: () => void
-  onMoveDown?: () => void
-  isFirst: boolean
-  isLast: boolean
 }
 
 export function PhotoGroup({
@@ -24,10 +20,6 @@ export function PhotoGroup({
   control,
   onRemove,
   canRemove,
-  onMoveUp,
-  onMoveDown,
-  isFirst,
-  isLast,
 }: PhotoGroupProps) {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const undoRef = useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -131,20 +123,8 @@ export function PhotoGroup({
 
   return (
     <Card>
-      <div className="flex items-center justify-between mb-3">
+      <div className="flex items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-2">
-          <div className="flex flex-col gap-0.5">
-            {!isFirst && (
-              <button type="button" onClick={onMoveUp} className="p-0.5 text-brand-gray hover:text-brand-orange transition-colors">
-                <ChevronUp size={14} />
-              </button>
-            )}
-            {!isLast && (
-              <button type="button" onClick={onMoveDown} className="p-0.5 text-brand-gray hover:text-brand-orange transition-colors">
-                <ChevronDown size={14} />
-              </button>
-            )}
-          </div>
           <span className="text-sm font-semibold text-brand-gray">Grupo {index + 1}</span>
         </div>
         <button

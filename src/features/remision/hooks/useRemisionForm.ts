@@ -121,9 +121,11 @@ export function useRemisionForm() {
     logFields: logFieldArray.fields,
     appendLog: logFieldArray.append,
     removeLog: logFieldArray.remove,
+    moveLog: logFieldArray.move,
     detFields: detFieldArray.fields,
     appendDet: detFieldArray.append,
     removeDet: detFieldArray.remove,
+    moveDet: detFieldArray.move,
     empezarNueva,
   }
 }

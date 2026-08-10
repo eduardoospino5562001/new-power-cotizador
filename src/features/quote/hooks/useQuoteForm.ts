@@ -17,6 +17,7 @@ function crearValoresPorDefecto(): CotizacionFormData {
     numero: getSiguienteNumero(),
     fecha: hoy(),
     validezDias: 15,
+    descripcion: '',
     cliente: { nombre: '', nit: '', ciudad: '', contacto: '', telefono: '' },
     items: [
       {
@@ -57,7 +58,7 @@ export function useQuoteForm() {
   })
 
   const { control, watch, reset } = form
-  const { fields, append, remove } = useFieldArray({ control, name: 'items' })
+  const { fields, append, remove, move } = useFieldArray({ control, name: 'items' })
 
   const addItem = () => {
     append({
@@ -104,6 +105,7 @@ export function useQuoteForm() {
     fields,
     addItem,
     removeItem,
+    moveItem: move,
     empezarNueva,
     siguienteNumero: getUltimoCorrelativo(),
   }

@@ -14,6 +14,7 @@ export const cotizacionSchema = z.object({
   numero: z.string(),
   fecha: z.string(),
   validezDias: z.coerce.number().positive(),
+  descripcion: z.string().optional().default(''),
   cliente: z.object({
     nombre: z.string().min(1, 'El nombre del cliente es obligatorio'),
     nit: z.string()

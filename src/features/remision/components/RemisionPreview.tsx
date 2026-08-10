@@ -22,8 +22,8 @@ export function RemisionPreview({ control, onGeneratePdf, generating, pdfError }
 
   return (
     <section className="space-y-6">
-      <div className="rounded-xl bg-white border border-brand-orange-light p-6 shadow-sm">
-        <div className="flex items-start justify-between border-b-2 border-brand-orange pb-4 mb-6">
+      <div className="rounded-xl bg-white border border-brand-orange-light p-4 shadow-sm sm:p-6">
+        <div className="mb-6 flex flex-col gap-4 border-b-2 border-brand-orange pb-4 sm:flex-row sm:items-start sm:justify-between">
           <div className="flex items-center gap-3">
             <img src={Logo} alt="Logo" className="w-16 h-16 object-contain rounded" />
             <div>
@@ -33,7 +33,7 @@ export function RemisionPreview({ control, onGeneratePdf, generating, pdfError }
               <p className="text-xs text-brand-gray">Teléfono: (57) 3204931541</p>
             </div>
           </div>
-          <div className="text-right">
+          <div className="text-left sm:text-right">
             <h2 className="text-lg font-bold text-brand-orange">REMISIÓN</h2>
             <p className="text-xs text-brand-gray">No. {data.numero}</p>
             <p className="text-xs text-brand-gray">Fecha: {formatDate(data.fecha)}</p>
@@ -62,7 +62,7 @@ export function RemisionPreview({ control, onGeneratePdf, generating, pdfError }
           <h3 className="text-sm font-bold text-brand-dark mb-3 border-b border-brand-orange-light pb-1">DETALLE DE ENTREGA</h3>
           {detalles.length > 0 ? (
             <div className="overflow-x-auto">
-              <table className="w-full text-xs">
+              <table className="min-w-[560px] w-full text-xs">
                 <thead>
                   <tr className="bg-brand-orange-light text-left">
                     <th className="p-2 font-bold text-brand-dark w-[10%]">Cant.</th>
@@ -97,7 +97,7 @@ export function RemisionPreview({ control, onGeneratePdf, generating, pdfError }
           </div>
         )}
 
-        <div className="grid grid-cols-2 gap-8 mt-8 pt-4 border-t border-brand-orange-light">
+        <div className="mt-8 grid grid-cols-1 gap-8 border-t border-brand-orange-light pt-4 sm:grid-cols-2">
           <div>
             <p className="text-xs font-bold text-brand-gray uppercase mb-3">ENTREGA</p>
             <div className="border-b border-brand-dark h-6 mb-1" /><p className="text-xs text-brand-gray mb-1">Firma</p>

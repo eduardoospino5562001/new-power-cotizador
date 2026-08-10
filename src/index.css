@@ -20,3 +20,14 @@ body {
   margin: 0;
   font-family: var(--font-sans);
 }
+
+html[data-theme='dark'] body { background: #171310; color: #f4ede7; }
+html[data-theme='dark'] .bg-white { background-color: #211b17; }
+html[data-theme='dark'] .bg-brand-light { background-color: #2b231d; }
+html[data-theme='dark'] .bg-brand-orange-light { background-color: #3a2b21; }
+html[data-theme='dark'] .text-brand-dark { color: #f4ede7; }
+html[data-theme='dark'] .text-brand-gray { color: #c9bbb0; }
+html[data-theme='dark'] .border-brand-orange-light { border-color: #5f4030; }
+html[data-theme='dark'] input,
+html[data-theme='dark'] select,
+html[data-theme='dark'] textarea { background-color: #171310; color: #f4ede7; border-color: #5f4030; }

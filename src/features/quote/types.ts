@@ -24,6 +24,7 @@ export interface Cotizacion {
   numero: string
   fecha: string
   validezDias: number
+  descripcion?: string
   cliente: Cliente
   items: ItemCotizacion[]
   descuentoPorcentaje: number

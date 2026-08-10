@@ -3,6 +3,7 @@ import { pdf } from '@react-pdf/renderer'
 import { RemisionPDF } from '../pdf/RemisionPDF'
 import type { Remision } from '../types'
 import logoUrl from '@/assets/logo.jpeg'
+import { saveAndDownloadHistoryRecord } from '@/features/history/historyStore'
 
 async function imagenABase64(url: string): Promise<string> {
   const respuesta = await fetch(url)
@@ -33,16 +34,17 @@ export function useGenerateRemisionPdf() {
 
       const doc = <RemisionPDF remision={remision} logoSrc={logoSrc} />
       const blob = await pdf(doc).toBlob()
-      const url = URL.createObjectURL(blob)
       const filename = `Remision-${remision.numero}.pdf`
-
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      await saveAndDownloadHistoryRecord({
+        blob,
+        name: filename,
+        module: 'remisiones',
+        moduleId: 'remision',
+        tool: 'Remision',
+        mime: 'application/pdf',
+        editableData: remision,
+        isEditable: true,
+      })
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : String(err)
       console.error('PDF generation error:', mensaje)

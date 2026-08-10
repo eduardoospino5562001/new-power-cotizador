@@ -3,6 +3,7 @@ import { pdf } from '@react-pdf/renderer'
 import { QuotePDF } from '../pdf/QuotePDF'
 import type { Cotizacion } from '../types'
 import logoUrl from '@/assets/logo.jpeg'
+import { saveAndDownloadHistoryRecord } from '@/features/history/historyStore'
 
 function slugify(text: string): string {
   return text
@@ -51,16 +52,17 @@ export function useGeneratePdf() {
 
       const doc = <QuotePDF cotizacion={cotizacion} logoSrc={logoSrc} />
       const blob = await pdf(doc).toBlob()
-      const url = URL.createObjectURL(blob)
       const filename = generarNombreArchivo(cotizacion)
-
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      await saveAndDownloadHistoryRecord({
+        blob,
+        name: filename,
+        module: 'cotizaciones',
+        moduleId: 'quote',
+        tool: 'Cotizacion',
+        mime: 'application/pdf',
+        editableData: cotizacion,
+        isEditable: true,
+      })
     } catch (err) {
       const mensaje = err instanceof Error ? err.message : String(err)
       console.error('PDF generation error:', mensaje)

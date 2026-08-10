@@ -20,6 +20,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
 
   const numero = values?.numero ?? 'C-1-118'
   const fecha = values?.fecha ?? ''
+  const descripcion = values?.descripcion ?? ''
   const validezDias = Number(values?.validezDias) || 15
   const clienteNombre = values?.cliente?.nombre || '[Nombre del cliente]'
   const clienteNit = values?.cliente?.nit || '[NIT del cliente]'
@@ -33,6 +34,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
     numero,
     fecha,
     validezDias,
+    descripcion,
     cliente: {
       nombre: clienteNombre,
       nit: clienteNit,
@@ -65,6 +67,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
       numero,
       fecha,
       validezDias,
+      descripcion,
       cliente: {
         nombre: clienteNombre,
         nit: clienteNit,
@@ -115,10 +118,12 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
         {values?.cliente?.ciudad && <p><span className="font-semibold">Ciudad:</span> {values.cliente.ciudad}</p>}
         {values?.vendedor && <p><span className="font-semibold">Vendedor:</span> {values.vendedor}</p>}
       </div>
+      {descripcion && <div className="mb-4 border-t border-brand-orange-light pt-3 text-sm text-brand-gray"><span className="font-semibold text-brand-dark">Descripción:</span> {descripcion}</div>}
 
-      <table className="w-full text-xs mb-4 border-collapse">
+      <div className="mb-4 overflow-x-auto">
+      <table className="min-w-[520px] w-full text-xs border-collapse">
         <thead>
-          <tr className="bg-brand-orange-light">
+          <tr className="bg-brand-light text-brand-dark">
             <th className="text-left p-1.5 font-bold">Item</th>
             <th className="text-left p-1.5 font-bold">Descripción</th>
             <th className="text-right p-1.5 font-bold">Cant.</th>
@@ -152,6 +157,7 @@ export function QuotePreview({ control, onGeneratePdf, generating, pdfError }: Q
           )}
         </tbody>
       </table>
+      </div>
 
       <TotalsSummary totals={tot} />
 

@@ -3,6 +3,7 @@ import { pdf } from '@react-pdf/renderer'
 import { ReportPDF } from '../pdf/ReportPDF'
 import type { InformeTecnico } from '../types'
 import logoUrl from '@/assets/logo.jpeg'
+import { saveAndDownloadHistoryRecord } from '@/features/history/historyStore'
 
 function slugify(text: string): string {
   return text.toUpperCase().trim().replace(/[^A-Z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-')
@@ -38,16 +39,17 @@ export function useGenerateReportPdf() {
 
       const doc = <ReportPDF informe={informe} logoSrc={logoSrc} />
       const blob = await pdf(doc).toBlob()
-      const url = URL.createObjectURL(blob)
       const filename = generarNombreArchivo(informe)
-
-      const link = document.createElement('a')
-      link.href = url
-      link.download = filename
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
+      await saveAndDownloadHistoryRecord({
+        blob,
+        name: filename,
+        module: 'informes',
+        moduleId: 'report',
+        tool: 'Informe tecnico',
+        mime: 'application/pdf',
+        editableData: informe,
+        isEditable: true,
+      })
     } catch (err) {
       setError(`Error al generar el PDF: ${err instanceof Error ? err.message : String(err)}`)
     } finally {

@@ -1,7 +1,7 @@
 import { useState, useCallback } from 'react'
 import { useWatch } from 'react-hook-form'
 import type { ContractFormReturn } from '../hooks/useContractForm'
-import { Card, Input, TextArea, Button } from '@/components/ui'
+import { Card, Input, TextArea, Button, SortableItem } from '@/components/ui'
 import { Trash2, Plus, XSquare } from 'lucide-react'
 import { formatCurrencyInput, parseCurrencyInput } from '../lib/format'
 
@@ -48,11 +48,14 @@ export function ContractForm({ form }: ContractFormProps) {
     gruposFields,
     appendGrupo,
     removeGrupo,
+    moveGrupo,
     addItemToGrupo,
     removeItemFromGrupo,
+    moveItemInGrupo,
     clausulasFields,
     appendClausula,
     removeClausula,
+    moveClausula,
   } = form
 
   const valorTotal = useWatch({ control, name: 'economico.valorTotal' })
@@ -123,13 +126,14 @@ export function ContractForm({ form }: ContractFormProps) {
       </Card>
 
       {gruposFields.map((g, gIdx) => (
-        <Card key={g.id}>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2 flex-1">
+        <SortableItem key={g.id} index={gIdx} total={gruposFields.length} listId="contract-groups" label={`equipo ${gIdx + 1}`} onMove={moveGrupo}>
+        <Card>
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex min-w-0 flex-col gap-2 sm:flex-1 sm:flex-row sm:items-center">
               <h2 className="text-lg font-bold text-brand-dark">Especificaciones</h2>
-              <Input className="w-48" placeholder="Nombre del equipo" {...register(`grupos.${gIdx}.nombre` as const)} />
+              <Input placeholder="Nombre del equipo" {...register(`grupos.${gIdx}.nombre` as const)} />
             </div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <Button type="button" variant="ghost" size="sm" onClick={() => addItemToGrupo(gIdx)}>
                 <Plus size={16} className="mr-1" /> Agregar
               </Button>
@@ -141,19 +145,22 @@ export function ContractForm({ form }: ContractFormProps) {
             </div>
           </div>
           <div className="space-y-2">
-            {g.items?.map((_, iIdx) => (
-              <div key={`${g.id}-item-${iIdx}`} className="flex items-start gap-2">
-                <div className="flex-1">
+            {g.items?.map((item, iIdx) => (
+              <SortableItem key={item.id} index={iIdx} total={g.items.length} listId={`contract-specifications-${g.id}`} label={`especificación ${iIdx + 1}`} onMove={(from, to) => moveItemInGrupo(gIdx, from, to)} className="rounded-lg border border-brand-orange-light/60 bg-transparent p-2">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-start">
+                <div className="min-w-0 flex-1">
                   <Input placeholder="Nombre" {...register(`grupos.${gIdx}.items.${iIdx}.nombre` as const)} />
                 </div>
-                <div className="flex-[2]">
+                <div className="min-w-0 flex-[2]">
                   <Input placeholder="Valor" {...register(`grupos.${gIdx}.items.${iIdx}.valor` as const)} />
                 </div>
-                <button type="button" onClick={() => removeItemFromGrupo(gIdx, iIdx)} className="mt-2 p-1 text-brand-gray hover:text-red-500 transition-colors" title="Eliminar"><Trash2 size={18} /></button>
+                <button type="button" onClick={() => removeItemFromGrupo(gIdx, iIdx)} className="self-end p-2 text-brand-gray hover:text-red-500 transition-colors sm:mt-1 sm:self-auto" title="Eliminar"><Trash2 size={18} /></button>
               </div>
+              </SortableItem>
             ))}
           </div>
         </Card>
+        </SortableItem>
       ))}
       <Button type="button" variant="ghost" size="sm" onClick={() => appendGrupo({ id: `grp-${Date.now()}`, nombre: `Equipo ${gruposFields.length + 1}`, items: [] })} className="w-full">
         <Plus size={16} className="mr-2" /> Agregar otro equipo
@@ -182,9 +189,9 @@ export function ContractForm({ form }: ContractFormProps) {
       </Card>
 
       <Card>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-bold text-brand-dark">Cláusulas</h2>
-          <div className="flex items-center gap-2">
+          <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <h2 className="text-lg font-bold text-brand-dark">Cláusulas</h2>
+            <div className="flex flex-wrap items-center gap-2">
             {selectedClausulas.size > 0 && (
               <Button type="button" variant="ghost" size="sm" onClick={eliminarSeleccionadas}>
                 <XSquare size={16} className="mr-1" /> Eliminar ({selectedClausulas.size})
@@ -203,11 +210,11 @@ export function ContractForm({ form }: ContractFormProps) {
             </Button>
           </div>
         </div>
-        <div className="space-y-3">
-          {clausulasFields.map((field, index) => (
-            <div key={field.id} className="border border-brand-orange-light rounded-lg p-3">
-              <div className="flex items-start justify-between mb-2">
-                <div className="flex items-center gap-2 flex-1">
+          <div className="space-y-3">
+            {clausulasFields.map((field, index) => (
+            <SortableItem key={field.id} index={index} total={clausulasFields.length} listId="contract-clauses" label={`cláusula ${index + 1}`} onMove={(from, to) => { moveClausula(from, to); setSelectedClausulas(new Set()) }} className="rounded-lg border border-brand-orange-light p-3">
+              <div className="mb-2 flex items-start justify-between gap-2">
+                <div className="flex min-w-0 flex-1 items-center gap-2">
                   <input
                     type="checkbox"
                     checked={selectedClausulas.has(index)}
@@ -224,11 +231,7 @@ export function ContractForm({ form }: ContractFormProps) {
                   type="button"
                   onClick={() => {
                     removeClausula(index)
-                    setSelectedClausulas((prev) => {
-                      const next = new Set(prev)
-                      next.delete(index)
-                      return next
-                    })
+                    setSelectedClausulas(new Set())
                   }}
                   className="ml-2 p-1 text-brand-gray hover:text-red-500 transition-colors shrink-0"
                   title="Eliminar"
@@ -240,7 +243,7 @@ export function ContractForm({ form }: ContractFormProps) {
                 placeholder="Contenido de la cláusula..."
                 {...register(`clausulas.${index}.texto` as const)}
               />
-            </div>
+            </SortableItem>
           ))}
         </div>
       </Card>

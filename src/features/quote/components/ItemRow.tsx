@@ -1,7 +1,7 @@
 import type { UseFormRegister, Control } from 'react-hook-form'
 import { useWatch } from 'react-hook-form'
 import type { CotizacionFormData } from '../logic/validation'
-import { NumberInput, Select } from '@/components/ui'
+import { NumberInput, Select, SortableItem } from '@/components/ui'
 import { calcularLineaItem } from '../logic/calculations'
 import { Trash2 } from 'lucide-react'
 
@@ -11,9 +11,11 @@ interface ItemRowProps {
   control: Control<CotizacionFormData>
   onRemove: () => void
   canRemove: boolean
+  total: number
+  onMove: (from: number, to: number) => void
 }
 
-export function ItemRow({ index, register, control, onRemove, canRemove }: ItemRowProps) {
+export function ItemRow({ index, register, control, onRemove, canRemove, total, onMove }: ItemRowProps) {
   const values = useWatch({ control, name: `items.${index}` })
 
   const bruto = values ? calcularLineaItem({
@@ -25,12 +27,14 @@ export function ItemRow({ index, register, control, onRemove, canRemove }: ItemR
   }) : { bruto: 0, ivaItem: 0 }
 
   return (
-    <div className="grid grid-cols-12 gap-2 items-end">
-      <span className="col-span-1 text-xs text-brand-gray self-center text-center font-semibold pb-2">
-        {index + 1}
+    <SortableItem index={index} total={total} listId="quote-items" label={`ítem ${index + 1}`} onMove={onMove} className="rounded-xl border border-brand-orange-light bg-transparent p-3">
+      <div className="grid grid-cols-2 items-end gap-3 sm:grid-cols-12 sm:gap-2">
+      <span className="col-span-2 text-xs text-brand-gray font-semibold sm:col-span-1 sm:pb-2 sm:text-center">
+        Ítem {index + 1}
       </span>
 
-      <div className="col-span-3">
+      <div className="col-span-2 sm:col-span-3">
+        <span className="mb-1 block text-xs font-medium text-brand-gray sm:hidden">Descripción</span>
         <input
           {...register(`items.${index}.descripcion`)}
           placeholder="Descripción"
@@ -38,7 +42,8 @@ export function ItemRow({ index, register, control, onRemove, canRemove }: ItemR
         />
       </div>
 
-      <div className="col-span-2">
+      <div className="col-span-1 sm:col-span-2">
+        <span className="mb-1 block text-xs font-medium text-brand-gray sm:hidden">Cantidad</span>
         <NumberInput
           {...register(`items.${index}.cantidad`, { valueAsNumber: true })}
           placeholder="Cant."
@@ -47,7 +52,8 @@ export function ItemRow({ index, register, control, onRemove, canRemove }: ItemR
         />
       </div>
 
-      <div className="col-span-2">
+      <div className="col-span-1 sm:col-span-2">
+        <span className="mb-1 block text-xs font-medium text-brand-gray sm:hidden">Vr. unitario</span>
         <NumberInput
           {...register(`items.${index}.valorUnitario`, { valueAsNumber: true })}
           placeholder="Vr. unit."
@@ -56,7 +62,8 @@ export function ItemRow({ index, register, control, onRemove, canRemove }: ItemR
         />
       </div>
 
-      <div className="col-span-2">
+      <div className="col-span-1 sm:col-span-2">
+        <span className="mb-1 block text-xs font-medium text-brand-gray sm:hidden">Impuesto</span>
         <Select
           {...register(`items.${index}.impuestoPorcentaje`, { valueAsNumber: true })}
           options={[
@@ -67,11 +74,12 @@ export function ItemRow({ index, register, control, onRemove, canRemove }: ItemR
         />
       </div>
 
-      <div className="col-span-1 pb-2 text-right text-sm font-semibold text-brand-dark self-center">
+      <div className="col-span-1 self-center text-right text-sm font-semibold text-brand-dark sm:pb-2">
+        <span className="mr-1 text-xs font-medium text-brand-gray sm:hidden">Bruto</span>
         $ {bruto.bruto.toLocaleString('es-CO')}
       </div>
 
-      <div className="col-span-1 pb-2 flex justify-end">
+      <div className="col-span-2 flex justify-end sm:col-span-1 sm:pb-2">
         <button
           type="button"
           onClick={onRemove}
@@ -82,6 +90,7 @@ export function ItemRow({ index, register, control, onRemove, canRemove }: ItemR
           <Trash2 size={16} />
         </button>
       </div>
-    </div>
+      </div>
+    </SortableItem>
   )
 }
